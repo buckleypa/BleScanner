@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/dimens.xml -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml -->
+    <integer name="config_slide_time">800</integer>
+    <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/strings.xml -->
+    <string name="action_settings">Settings</string>
+    <string name="app_name">BleScanner</string>
+    <string name="available_devices_string">Advertising Devices</string>
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="characteristicListLabel">Characteristics:</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="instructions_string">Press the scan button to see devices that are advertising.</string>
+    <string name="serviceUuidLabel">Service UUID:</string>
+    <string name="title_activity_advertising_devices">Advertising Devices</string>
+    <string name="title_activity_available_ble_devices">Available BLE Devices</string>
+    <string name="title_activity_connected_device">Connected Device</string>
+    <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/styles.xml -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+
+</resources>
