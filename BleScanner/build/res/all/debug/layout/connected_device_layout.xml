@@ -9,12 +9,14 @@
     tools:context=".ConnectedDeviceActivity"
     android:orientation="vertical" >
 
-    <ListView
+    <ExpandableListView
         android:id="@+id/deviceServicesListView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
-        android:dividerHeight="10dp" />
+        android:dividerHeight="5dp"
+        android:childDivider="@android:color/transparent"
+        android:childIndicator="@drawable/card_border"/>
 
 </LinearLayout>
 <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/connected_device_layout.xml -->

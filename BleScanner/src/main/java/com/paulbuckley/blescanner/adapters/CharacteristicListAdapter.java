@@ -1,4 +1,4 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.adapters;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import com.paulbuckley.blescanner.R;
 
 import java.util.ArrayList;
 

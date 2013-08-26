@@ -19,23 +19,40 @@ public final class R {
     }
     public static final class drawable {
         public static final int card_border=0x7f020000;
-        public static final int ic_launcher=0x7f020001;
-        public static final int navigation_refresh=0x7f020002;
-        public static final int sub_card_border=0x7f020003;
+        public static final int ccc_toggle_button=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int navigation_refresh=0x7f020003;
+        public static final int sub_card_border=0x7f020004;
     }
     public static final class id {
-        public static final int action_rescan=0x7f09000b;
-        public static final int action_settings=0x7f09000a;
-        public static final int availableDevicesListView=0x7f090004;
-        public static final int characteristicNameTextView=0x7f090005;
+        public static final int action_rescan=0x7f09001b;
+        public static final int action_settings=0x7f09001a;
+        public static final int asciiTableRow=0x7f09000d;
+        public static final int asciiValueTextView=0x7f09000e;
+        public static final int availableDevicesListView=0x7f090005;
+        public static final int characteristicNameTextView=0x7f090008;
         public static final int deviceAddrTextView=0x7f090003;
         public static final int deviceNameTextView=0x7f090002;
-        public static final int deviceServicesListView=0x7f090006;
+        public static final int deviceServicesListView=0x7f090014;
+        public static final int deviceUuidTableRow=0x7f090015;
+        public static final int deviceUuidTextView=0x7f090016;
+        public static final int deviceUuidsTableLayout=0x7f090004;
+        public static final int hexTableRow=0x7f09000f;
+        public static final int hexValueTextView=0x7f090010;
         public static final int instructionsTextView=0x7f090000;
-        public static final int serviceCharacteristicsListView=0x7f090009;
-        public static final int serviceNameTextView=0x7f090007;
-        public static final int serviceUuidTextView=0x7f090008;
+        public static final int intTableRow=0x7f090011;
+        public static final int intValueTextView=0x7f090012;
+        public static final int scanCompleteTextView=0x7f090007;
+        public static final int scanDurationProgress=0x7f090006;
+        public static final int serviceNameEditView=0x7f090019;
+        public static final int serviceNameTextView=0x7f090018;
+        public static final int serviceNameViewSwitcher=0x7f090017;
         public static final int startScanButton=0x7f090001;
+        public static final int toggleIndicationsButton=0x7f09000a;
+        public static final int toggleNotificationsButton=0x7f090009;
+        public static final int valueDateTextView=0x7f090013;
+        public static final int valueTableLayout=0x7f09000c;
+        public static final int writeCharacteristicEditText=0x7f09000b;
     }
     public static final class integer {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml 
@@ -48,7 +65,8 @@ public final class R {
         public static final int available_devices_layout=0x7f030002;
         public static final int characteristic_list_item=0x7f030003;
         public static final int connected_device_layout=0x7f030004;
-        public static final int service_list_item_layout=0x7f030005;
+        public static final int device_uuid_table_row=0x7f030005;
+        public static final int service_list_item_layout=0x7f030006;
     }
     public static final class menu {
         public static final int advertising_devices=0x7f080000;
@@ -59,20 +77,31 @@ public final class R {
     public static final class string {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/strings.xml 
          */
-        public static final int action_settings=0x7f060000;
-        public static final int app_name=0x7f060001;
-        public static final int available_devices_string=0x7f060002;
-        public static final int ble_not_supported=0x7f060003;
-        public static final int characteristicListLabel=0x7f060004;
-        public static final int connected=0x7f060005;
-        public static final int disconnected=0x7f060006;
-        public static final int error_bluetooth_not_supported=0x7f060007;
-        public static final int hello_world=0x7f060008;
-        public static final int instructions_string=0x7f060009;
-        public static final int serviceUuidLabel=0x7f06000a;
-        public static final int title_activity_advertising_devices=0x7f06000b;
-        public static final int title_activity_available_ble_devices=0x7f06000c;
-        public static final int title_activity_connected_device=0x7f06000d;
+        public static final int CHARACTERISTIC_READ_TAG=0x7f060000;
+        public static final int VIEW_CHARACTERISTIC_TAG=0x7f060001;
+        public static final int action_settings=0x7f060002;
+        public static final int app_name=0x7f060003;
+        public static final int asciiRowHeader=0x7f060004;
+        public static final int available_devices_string=0x7f060005;
+        public static final int ble_not_supported=0x7f060006;
+        public static final int characteristicListLabel=0x7f060007;
+        public static final int connected=0x7f060008;
+        public static final int dateRowHeader=0x7f060009;
+        public static final int disconnected=0x7f06000a;
+        public static final int enableIndicateButtonText=0x7f06000b;
+        public static final int enableNotifyButtonText=0x7f06000c;
+        public static final int error_bluetooth_not_supported=0x7f06000d;
+        public static final int hello_world=0x7f06000e;
+        public static final int hexRowHeader=0x7f06000f;
+        public static final int instructions_string=0x7f060010;
+        public static final int intRowHeader=0x7f060011;
+        public static final int scanComplete=0x7f060012;
+        public static final int serviceUuidLabel=0x7f060013;
+        public static final int title_activity_advertising_devices=0x7f060014;
+        public static final int title_activity_available_ble_devices=0x7f060015;
+        public static final int title_activity_connected_device=0x7f060016;
+        public static final int writeCharacteristicLabel=0x7f060017;
+        public static final int writeCharacteristicsImeLabel=0x7f060018;
     }
     public static final class style {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/styles.xml 

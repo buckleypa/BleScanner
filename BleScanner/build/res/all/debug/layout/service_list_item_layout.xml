@@ -5,47 +5,33 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
         android:layout_margin="15dp"
         android:background="@drawable/card_border">
 
-        <TextView
+        <ViewSwitcher
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/serviceNameViewSwitcher"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/serviceNameTextView"
-                style="@android:style/TextAppearance.Large"
-                android:textStyle="bold" >
-        </TextView>
+                android:layout_height="fill_parent" >
 
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="@string/serviceUuidLabel"
-                style="@android:style/TextAppearance.Medium"
-                android:textStyle="bold" >
-        </TextView>
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:id="@+id/serviceNameTextView"
+                        style="@android:style/TextAppearance.Large"
+                        android:textStyle="bold" >
+                </TextView>
 
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/serviceUuidTextView"
-                style="@android:style/TextAppearance.Small" >
-        </TextView>
+                <EditText
+                        android:id="@+id/serviceNameEditView"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent" >
+                </EditText>
 
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="@string/characteristicListLabel"
-                style="@android:style/TextAppearance.Medium"
-                android:textStyle="bold" >
-        </TextView>
-
-        <ListView
-                android:id="@+id/serviceCharacteristicsListView"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="10dp" />
-
+        </ViewSwitcher>
 
 </LinearLayout><!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/service_list_item_layout.xml -->

@@ -1,6 +1,7 @@
 package com.paulbuckley.blescanner;
 
-import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -12,34 +13,78 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
-import android.widget.ListView;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
+
+import com.paulbuckley.blescanner.adapters.ServicesListViewAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.paulbuckley.blescanner.BluetoothLeService.*;
 
 public class ConnectedDeviceActivity
         extends Activity
 {
     private final static String TAG = ConnectedDeviceActivity.class.getSimpleName();
 
+    // Identifiers for establishing the initial connection.
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
     private String mDeviceName;
     private String mDeviceAddress;
 
-    private boolean mConnected = false;
-
     Context mContext;
-    BluetoothGatt mBluetoothGatt;
-    private ArrayList< BluetoothGattService > mServices;
-    private DeviceServicesListViewAdapter mServicesListViewAdapter;
+
+    private List< BluetoothGattService > mServices;
+    private Map< BluetoothGattService, List<BluetoothGattCharacteristic >> mServiceCharacteristics;
+
+    private ServicesListViewAdapter mServicesListViewAdapter;
 
     private BluetoothLeService mBluetoothLeService;
+
+
+    /***********************************************************************************************
+     *
+     */
+    private final TextView.OnEditorActionListener saveServiceName = new TextView.OnEditorActionListener()
+    {
+        @Override
+        public boolean
+        onEditorAction(
+                TextView v,
+                int actionId,
+                KeyEvent event
+        )
+        {
+            if( actionId == EditorInfo.IME_NULL
+                    && event.getAction() == KeyEvent.ACTION_DOWN )
+            {
+
+                ViewSwitcher switcher = (ViewSwitcher) v.findViewById(R.id.serviceNameViewSwitcher);
+                EditText nameToSaveView = (EditText) switcher.findViewById( R.id.serviceNameEditView );
+                String nameToSave = nameToSaveView.getText().toString();
+
+                TextView textView = (TextView) switcher.findViewById( R.id.serviceNameTextView );
+                textView.setText( nameToSave );
+
+                switcher.showNext();
+            }
+            return true;
+        }
+    };
 
 
     /***********************************************************************************************
@@ -95,27 +140,31 @@ public class ConnectedDeviceActivity
         {
             final String action = intent.getAction();
 
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action))
+            if (ACTION_GATT_CONNECTED.equals(action))
             {
-                mConnected = true;
                 updateConnectionState(R.string.connected);
             }
-            else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action))
+            else if (ACTION_GATT_DISCONNECTED.equals(action))
             {
-                mConnected = false;
                 updateConnectionState(R.string.disconnected);
 
                 Intent exitIntent = new Intent( mContext, AdvertisingDevicesActivity.class );
                 startActivity( exitIntent );
+                finish();
             }
-            else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
+            else if (ACTION_GATT_SERVICES_DISCOVERED.equals(action))
             {
                 // Show all the supported services and characteristics on the user interface.
                 displayGattServices( mBluetoothLeService.getSupportedGattServices() );
             }
-            else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action))
+            else if (ACTION_DATA_AVAILABLE.equals(action))
             {
-                //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                mServicesListViewAdapter.notifyDataSetChanged();
+                /*
+                BluetoothGattCharacteristic characteristic
+                        = (BluetoothGattCharacteristic)intent.getParcelableExtra( BluetoothLeService.EXTRA_CHARACTERISTIC );
+                updateCharacteristicValue( characteristic );
+                */
             }
         }
     };
@@ -145,14 +194,8 @@ public class ConnectedDeviceActivity
         // Set the activity title to be the name of the device.
         this.setTitle( mDeviceName );
 
-        // Set the adapter for the services list view.
-        mServices = new ArrayList<BluetoothGattService>();
-        ListView servicesListView = (ListView) findViewById( R.id.deviceServicesListView );
-        mServicesListViewAdapter = new DeviceServicesListViewAdapter( this, mServices );
-        servicesListView.setAdapter( mServicesListViewAdapter );
-
         Intent gattServiceIntent = new Intent( this, BluetoothLeService.class );
-        bindService( gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE );
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
 
@@ -243,6 +286,70 @@ public class ConnectedDeviceActivity
     }
 
 
+    private void
+    setupDataView()
+    {
+        // Set the adapter for the services list view.
+        mServices = new ArrayList<BluetoothGattService>();
+        mServiceCharacteristics = new HashMap<BluetoothGattService, List<BluetoothGattCharacteristic>>();
+
+        ExpandableListView servicesListView = (ExpandableListView) findViewById( R.id.deviceServicesListView );
+        mServicesListViewAdapter = new ServicesListViewAdapter(
+                this,
+                mServices,
+                mServiceCharacteristics,
+                mBluetoothLeService );
+
+        servicesListView.setAdapter( mServicesListViewAdapter );
+        servicesListView.setOnChildClickListener( new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean
+            onChildClick(
+                    ExpandableListView parent,
+                    View v,
+                    int groupPosition,
+                    int childPosition,
+                    long id
+            )
+            {
+                BluetoothGattCharacteristic characteristic
+                        = mServiceCharacteristics.get( mServices.get( groupPosition ) ).get( childPosition );
+
+                if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) != 0 )
+                {
+                    v.setTag( R.string.CHARACTERISTIC_READ_TAG, new Boolean( true ) );
+                    mBluetoothLeService.readCharacteristic( characteristic );
+                }
+
+                return true;
+            }
+        });
+
+        servicesListView.setOnItemLongClickListener( new ExpandableListView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(
+                    AdapterView<?> parent,
+                    View view,
+                    int position,
+                    long id
+            )
+            {
+                ViewSwitcher switcher = (ViewSwitcher) view.findViewById(R.id.serviceNameViewSwitcher);
+
+                EditText editText = (EditText) switcher.findViewById( R.id.serviceNameEditView );
+                String currentUuid = ((BluetoothGattService)mServicesListViewAdapter.getGroup( position ) ).getUuid().toString();
+
+                editText.setText( GattAttributes.lookup( currentUuid ) );
+                editText.setOnEditorActionListener( saveServiceName );
+
+                switcher.showNext();
+
+                return true;
+            }
+        });
+    }
+
     /***********************************************************************************************
      *
      */
@@ -264,11 +371,33 @@ public class ConnectedDeviceActivity
             List< BluetoothGattService > services
     )
     {
+        // Set up the data presentation table.
+        setupDataView();
+
         mServices.clear();
+        mServiceCharacteristics.clear();
 
         for( BluetoothGattService service : services )
         {
-            mServices.add( service );
+            mServices.add(service);
+
+            List< BluetoothGattCharacteristic > characteristics = service.getCharacteristics();
+            mServiceCharacteristics.put(service, characteristics );
+
+            for( BluetoothGattCharacteristic characteristic : characteristics )
+            {
+                mBluetoothLeService.readCharacteristic(characteristic);
+
+                if( characteristic.getDescriptors() != null )
+                {
+                    List< BluetoothGattDescriptor > descriptors = characteristic.getDescriptors();
+                    for( BluetoothGattDescriptor descriptor : descriptors )
+                    {
+                        mBluetoothLeService.readDescriptor( descriptor );
+                    }
+
+                }
+            }
         }
 
         mServicesListViewAdapter.notifyDataSetChanged();
@@ -282,10 +411,12 @@ public class ConnectedDeviceActivity
     makeGattUpdateIntentFilter()
     {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(ACTION_GATT_CONNECTED);
+        intentFilter.addAction(ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
 }
+
+

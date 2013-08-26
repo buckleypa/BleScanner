@@ -7,20 +7,31 @@
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml -->
     <integer name="config_slide_time">800</integer>
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/strings.xml -->
+    <string name="CHARACTERISTIC_READ_TAG">com.paulbuckley.blescanner.CHARACTERISTIC_READ_TAG</string>
+    <string name="VIEW_CHARACTERISTIC_TAG">com.paulbuckley.blescanner.VIEW_CHARACTERISTIC_TAG</string>
     <string name="action_settings">Settings</string>
     <string name="app_name">BleScanner</string>
+    <string name="asciiRowHeader">ASCII</string>
     <string name="available_devices_string">Advertising Devices</string>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="characteristicListLabel">Characteristics:</string>
     <string name="connected">Connected</string>
+    <string name="dateRowHeader">Date</string>
     <string name="disconnected">Disconnected</string>
+    <string name="enableIndicateButtonText">Indicate</string>
+    <string name="enableNotifyButtonText">Notify</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="hello_world">Hello world!</string>
+    <string name="hexRowHeader">Hex</string>
     <string name="instructions_string">Press the scan button to see devices that are advertising.</string>
+    <string name="intRowHeader">Integer</string>
+    <string name="scanComplete">Scan complete</string>
     <string name="serviceUuidLabel">Service UUID:</string>
     <string name="title_activity_advertising_devices">Advertising Devices</string>
     <string name="title_activity_available_ble_devices">Available BLE Devices</string>
     <string name="title_activity_connected_device">Connected Device</string>
+    <string name="writeCharacteristicLabel">Value to write...</string>
+    <string name="writeCharacteristicsImeLabel">Write</string>
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/styles.xml -->
     <style name="AppBaseTheme" parent="android:Theme.Light">
         <!--

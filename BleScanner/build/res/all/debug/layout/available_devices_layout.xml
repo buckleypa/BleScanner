@@ -11,11 +11,32 @@
     tools:context=".AdvertisingDevicesActivity"
     android:orientation="vertical" >
 
+
     <ListView
             android:id="@+id/availableDevicesListView"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:divider="@android:color/transparent"
             android:dividerHeight="10dp" />
+
+    <ProgressBar
+            android:id="@+id/scanDurationProgress"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:indeterminateOnly="true"
+            android:padding="5dp"
+            android:visibility="gone" />
+
+    <TextView
+            android:text="@string/scanComplete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/scanCompleteTextView"
+            style="@android:style/TextAppearance.Small"
+            android:textStyle="italic"
+            android:gravity="center_horizontal"
+            android:padding="5dp"
+            android:visibility="gone" >
+    </TextView>
 
 </LinearLayout><!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/available_devices_layout.xml -->

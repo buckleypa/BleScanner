@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/background_light"/>
+
+    <corners android:radius="2dp" />
+
+    <padding android:left="5dip" android:top="5dip" android:right="5dip" android:bottom="5dip" />
+</selector><!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/drawable/ccc_toggle_button.xml -->

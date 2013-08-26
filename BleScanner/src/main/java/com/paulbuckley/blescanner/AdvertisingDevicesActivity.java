@@ -3,18 +3,29 @@ package com.paulbuckley.blescanner;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.paulbuckley.blescanner.adapters.AdvertisingDevicesListAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class AdvertisingDevicesActivity
         extends Activity
@@ -25,7 +36,7 @@ public class AdvertisingDevicesActivity
     private Handler mHandler;
     private Context mContext;
 
-    private ArrayList< BluetoothDevice > mAdvertisingDevices;
+    private Map< BluetoothDevice, ArrayList<UUID> > mAdvertisingDevices;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -33,7 +44,64 @@ public class AdvertisingDevicesActivity
     private static final long SCAN_PERIOD = 10000;
 
 
+    /***********************************************************************************************
+     *
+     */
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
 
+            if( BluetoothDevice.ACTION_UUID.equals( action ) )
+            {
+                BluetoothDevice device = intent.getParcelableExtra( BluetoothDevice.EXTRA_DEVICE );
+                ParcelUuid[] parcelUuids = (ParcelUuid[]) intent.getParcelableArrayExtra( BluetoothDevice.EXTRA_UUID );
+
+                if( parcelUuids != null )
+                {
+                    if( parcelUuids.length != 0 )
+                    {
+                        ArrayList< UUID > uuids = mAdvertisingDevices.get( device );
+
+                        for( ParcelUuid parcelUuid : parcelUuids )
+                        {
+                            uuids.add( parcelUuid.getUuid() );
+                        }
+
+                        mLeDeviceListAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+            else if ( BluetoothDevice.ACTION_FOUND.equals( action ) )
+            {
+                BluetoothDevice device = (BluetoothDevice) mLeDeviceListAdapter.getItem( 0 );
+                if( device != null )
+                {
+                    device.fetchUuidsWithSdp();
+                }
+            }
+        }
+    };
+
+
+    /***********************************************************************************************
+     *
+     */
+    private static IntentFilter
+    makeIntentFilter()
+    {
+        final IntentFilter intentFilter = new IntentFilter();
+
+        intentFilter.addAction( BluetoothDevice.ACTION_UUID );
+        intentFilter.addAction( BluetoothDevice.ACTION_FOUND );
+
+        return intentFilter;
+    }
+
+
+    /***********************************************************************************************
+     *
+     */
     @Override
     protected void
     onCreate(
@@ -43,10 +111,12 @@ public class AdvertisingDevicesActivity
         super.onCreate(savedInstanceState);
         setContentView( R.layout.available_devices_layout );
 
+        this.setTitle( R.string.available_devices_string );
+
         mContext = this;
         mScanning = false;
         mHandler = new Handler();
-        mAdvertisingDevices = new ArrayList< BluetoothDevice >();
+        mAdvertisingDevices = new HashMap< BluetoothDevice, ArrayList< UUID > >();
 
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
@@ -79,7 +149,7 @@ public class AdvertisingDevicesActivity
                     {
                         scanLeDevice( false );
 
-                        final BluetoothDevice device = mLeDeviceListAdapter.getItem( position );
+                        final BluetoothDevice device = (BluetoothDevice) mLeDeviceListAdapter.getItem( position );
 
                         if( device == null ) return;
 
@@ -96,16 +166,24 @@ public class AdvertisingDevicesActivity
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     @Override
     public void
     onResume()
     {
         super.onResume();
 
+        registerReceiver( mBroadcastReceiver, makeIntentFilter() );
+
         scanLeDevice( true );
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     @Override
     public void
     onPause()
@@ -115,11 +193,16 @@ public class AdvertisingDevicesActivity
         scanLeDevice( false );
 
         // Reset what is displayed.
-        mAdvertisingDevices.clear();
+        mLeDeviceListAdapter.clear();
         mLeDeviceListAdapter.notifyDataSetChanged();
+
+        unregisterReceiver( mBroadcastReceiver );
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -128,6 +211,9 @@ public class AdvertisingDevicesActivity
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -142,38 +228,47 @@ public class AdvertisingDevicesActivity
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     public void
     startScan(
             View view
     )
     {
-        scanLeDevice( false );
-
         scanLeDevice( true );
     }
 
 
+    /***********************************************************************************************
+     *
+     */
     private void
     scanLeDevice(
             final boolean enable
     )
     {
+        ProgressBar progressBar = (ProgressBar) findViewById( R.id.scanDurationProgress );
+        TextView textComplete = (TextView) findViewById( R.id.scanCompleteTextView );
+
         if( enable )
         {
+            progressBar.setVisibility( View.VISIBLE );
+            textComplete.setVisibility( View.GONE );
+
+            // Reset what is displayed.
+            mLeDeviceListAdapter.clear();
+            mLeDeviceListAdapter.notifyDataSetChanged();
+
             // If already scanning, just restart the callback for turning scanning off.
             if( mScanning )
             {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 mHandler.removeCallbacks( delayedDisableScanning );
             }
-            // Else if not already scanning, set the device to be scanning.
-            else
-            {
-                mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-                // Reset what is displayed.
-                mAdvertisingDevices.clear();
-                mLeDeviceListAdapter.notifyDataSetChanged();
-            }
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed( delayedDisableScanning, SCAN_PERIOD );
             mScanning = true;
@@ -184,12 +279,20 @@ public class AdvertisingDevicesActivity
             {
                 mScanning = false;
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
+
+                progressBar.setVisibility( View.GONE );
             }
+
+            textComplete.setVisibility( View.VISIBLE );
+            mHandler.removeCallbacks( delayedDisableScanning );
         }
+
     }
 
 
-    // Device scan callback.
+    /***********************************************************************************************
+     * Device scan callback
+     */
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
 
@@ -204,21 +307,22 @@ public class AdvertisingDevicesActivity
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mLeDeviceListAdapter.add(device);
+                            mLeDeviceListAdapter.addDevice( device );
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
                     });
                 }
             };
 
-    // Create a runnable that cancels scanning that we can run later.
+
+
+    /***********************************************************************************************
+     *Create a runnable that cancels scanning that we can run later.
+     */
     private Runnable delayedDisableScanning = new Runnable() {
         @Override
         public void run() {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan( mLeScanCallback );
+            scanLeDevice( false );
         }
     };
-
-
 }

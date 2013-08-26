@@ -13,9 +13,24 @@
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="ble_not_supported">BLE is not supported</string>
 
+    <string name="scanComplete">Scan complete</string>
+
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
 
     <string name="serviceUuidLabel">Service UUID:</string>
     <string name="characteristicListLabel">Characteristics:</string>
+    <string name="writeCharacteristicLabel">Value to write...</string>
+    <string name="writeCharacteristicsImeLabel">Write</string>
+
+    <string name="asciiRowHeader">ASCII</string>
+    <string name="hexRowHeader">Hex</string>
+    <string name="intRowHeader">Integer</string>
+    <string name="dateRowHeader">Date</string>
+
+    <string name="enableNotifyButtonText">Notify</string>
+    <string name="enableIndicateButtonText">Indicate</string>
+
+    <string name="VIEW_CHARACTERISTIC_TAG">com.paulbuckley.blescanner.VIEW_CHARACTERISTIC_TAG</string>
+    <string name="CHARACTERISTIC_READ_TAG">com.paulbuckley.blescanner.CHARACTERISTIC_READ_TAG</string>
 </resources>
