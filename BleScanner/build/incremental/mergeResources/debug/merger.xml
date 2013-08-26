@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res" >
+            <file
+                name="card_border"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable\card_border.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="sub_card_border"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable\sub_card_border.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-hdpi\ic_launcher.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="navigation_refresh"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-hdpi\navigation_refresh.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-mdpi\ic_launcher.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="navigation_refresh"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-mdpi\navigation_refresh.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-xhdpi\ic_launcher.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="navigation_refresh"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-xhdpi\navigation_refresh.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable-xxhdpi\ic_launcher.png"
+                qualifiers="xxhdpi"
+                type="drawable" />
+            <file
+                name="activity_main"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\activity_main.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="available_devices_layout"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\available_devices_layout.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="available_device_row_item_layout"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\available_device_row_item_layout.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="characteristic_list_item"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\characteristic_list_item.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="connected_device_layout"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\connected_device_layout.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="service_list_item_layout"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\service_list_item_layout.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="advertising_devices"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\menu\advertising_devices.xml"
+                qualifiers=""
+                type="menu" />
+            <file
+                name="available_ble_devices"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\menu\available_ble_devices.xml"
+                qualifiers=""
+                type="menu" />
+            <file
+                name="connected_device"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\menu\connected_device.xml"
+                qualifiers=""
+                type="menu" />
+            <file
+                name="main"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\menu\main.xml"
+                qualifiers=""
+                type="menu" />
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values\dimens.xml"
+                qualifiers="" >
+                <dimen name="activity_horizontal_margin" >16dp
+                </dimen>
+                <dimen name="activity_vertical_margin" >16dp
+                </dimen>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values\integers.xml"
+                qualifiers="" >
+                <integer name="config_slide_time" >
+800
+                </integer>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values\strings.xml"
+                qualifiers="" >
+                <string name="asciiRowHeader" >ASCII
+                </string>
+                <string name="characteristicListLabel" >Characteristics:
+                </string>
+                <string name="action_settings" >Settings
+                </string>
+                <string name="intRowHeader" >Integer
+                </string>
+                <string name="title_activity_advertising_devices" >Advertising Devices
+                </string>
+                <string name="ble_not_supported" >BLE is not supported
+                </string>
+                <string name="instructions_string" >Press the scan button to see devices that are advertising.
+                </string>
+                <string name="connected" >Connected
+                </string>
+                <string name="title_activity_connected_device" >Connected Device
+                </string>
+                <string name="writeCharacteristicsImeLabel" >Write
+                </string>
+                <string name="disconnected" >Disconnected
+                </string>
+                <string name="scanComplete" >Scan complete
+                </string>
+                <string name="enableIndicateButtonText" >Indicate
+                </string>
+                <string name="enableNotifyButtonText" >Notify
+                </string>
+                <string name="app_name" >BleScanner
+                </string>
+                <string name="available_devices_string" >Advertising Devices
+                </string>
+                <string name="title_activity_available_ble_devices" >Available BLE Devices
+                </string>
+                <string name="writeCharacteristicLabel" >Value to write...
+                </string>
+                <string name="hexRowHeader" >Hex
+                </string>
+                <string name="VIEW_CHARACTERISTIC_TAG" >com.paulbuckley.blescanner.VIEW_CHARACTERISTIC_TAG
+                </string>
+                <string name="error_bluetooth_not_supported" >Bluetooth not supported.
+                </string>
+                <string name="hello_world" >Hello world!
+                </string>
+                <string name="dateRowHeader" >Date
+                </string>
+                <string name="CHARACTERISTIC_READ_TAG" >com.paulbuckley.blescanner.CHARACTERISTIC_READ_TAG
+                </string>
+                <string name="serviceUuidLabel" >Service UUID:
+                </string>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values\styles.xml"
+                qualifiers="" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Light" >
+
+                    <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+                    -->
+                </style>
+
+                <style
+                    name="AppTheme"
+                    parent="AppBaseTheme" >
+
+                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                </style>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values-sw720dp-land\dimens.xml"
+                qualifiers="sw720dp-land" >
+                <dimen name="activity_horizontal_margin" >128dp
+                </dimen>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values-v11\styles.xml"
+                qualifiers="v11" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light" >
+
+                    <!-- API 11 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\values-v14\styles.xml"
+                qualifiers="v14" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light.DarkActionBar" >
+
+                    <!-- API 14 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                name="ccc_toggle_button"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\drawable\ccc_toggle_button.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="device_uuid_table_row"
+                path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\main\res\layout\device_uuid_table_row.xml"
+                qualifiers=""
+                type="layout" />
+        </source>
+        <source path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\build\res\rs\debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="C:\Users\paulb\AndroidStudioProjects\BleScannerProject\BleScanner\src\debug\res" />
+    </dataSet>
+
+</merger>
