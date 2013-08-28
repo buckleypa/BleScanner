@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -63,6 +64,8 @@ BluetoothLeService
             "com.paulbuckley.blescanner.EXTRA_CHARACTERISTIC";
     public final static String EXTRA_CHARACTERISTIC_UUID =
             "com.paulbuckley.blescanner.EXTRA_CHARACTERISTIC_UUID";
+    public final static String ACTION_CHARACTERISTIC_READ =
+            "com.paulbuckley.blescanner.ACTION_CHARACTERISTIC_READ";
 
 
 
@@ -160,7 +163,7 @@ BluetoothLeService
                 if ( status == BluetoothGatt.GATT_SUCCESS )
                 {
                     bleCommandsSeen.add( "Resp: Characteristic read " + characteristic.getUuid().toString() );
-                    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                    broadcastUpdate(ACTION_CHARACTERISTIC_READ, characteristic);
                 }
             }
 
@@ -189,7 +192,7 @@ BluetoothLeService
             )
             {
                 bleCommandsSeen.add( "Resp: Characteristic changed" );
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                broadcastUpdate( ACTION_CHARACTERISTIC_READ, characteristic );
             }
 
             @Override

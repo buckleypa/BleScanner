@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.paulbuckley.blescanner.BluetoothLeService.*;
 
@@ -49,7 +50,8 @@ public class ConnectedDeviceActivity
     Context mContext;
 
     private List< BluetoothGattService > mServices;
-    private Map< BluetoothGattService, List<BluetoothGattCharacteristic >> mServiceCharacteristics;
+    private Map< BluetoothGattService, List< ExtendedBtGattCharacteristic >> mServiceCharacteristics;
+    private Map< UUID, ExtendedBtGattCharacteristic > mCharacteristicMapping;
 
     private ServicesListViewAdapter mServicesListViewAdapter;
 
@@ -160,11 +162,16 @@ public class ConnectedDeviceActivity
             else if (ACTION_DATA_AVAILABLE.equals(action))
             {
                 mServicesListViewAdapter.notifyDataSetChanged();
-                /*
-                BluetoothGattCharacteristic characteristic
-                        = (BluetoothGattCharacteristic)intent.getParcelableExtra( BluetoothLeService.EXTRA_CHARACTERISTIC );
-                updateCharacteristicValue( characteristic );
-                */
+            }
+            else if( ACTION_CHARACTERISTIC_READ.equals( action ) )
+            {
+                String uuidString = intent.getStringExtra( BluetoothLeService.EXTRA_CHARACTERISTIC_UUID );
+                UUID uuid = UUID.fromString( uuidString );
+                ExtendedBtGattCharacteristic extendedCharacteristic = mCharacteristicMapping.get( uuid );
+
+                extendedCharacteristic.wasRead();
+
+                mServicesListViewAdapter.notifyDataSetChanged();
             }
         }
     };
@@ -291,7 +298,8 @@ public class ConnectedDeviceActivity
     {
         // Set the adapter for the services list view.
         mServices = new ArrayList<BluetoothGattService>();
-        mServiceCharacteristics = new HashMap<BluetoothGattService, List<BluetoothGattCharacteristic>>();
+        mServiceCharacteristics = new HashMap<BluetoothGattService, List<ExtendedBtGattCharacteristic>>();
+        mCharacteristicMapping = new HashMap< UUID, ExtendedBtGattCharacteristic>();
 
         ExpandableListView servicesListView = (ExpandableListView) findViewById( R.id.deviceServicesListView );
         mServicesListViewAdapter = new ServicesListViewAdapter(
@@ -301,6 +309,8 @@ public class ConnectedDeviceActivity
                 mBluetoothLeService );
 
         servicesListView.setAdapter( mServicesListViewAdapter );
+
+        /*
         servicesListView.setOnChildClickListener( new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean
@@ -324,6 +334,7 @@ public class ConnectedDeviceActivity
                 return true;
             }
         });
+        */
 
         servicesListView.setOnItemLongClickListener( new ExpandableListView.OnItemLongClickListener() {
 
@@ -381,16 +392,23 @@ public class ConnectedDeviceActivity
         {
             mServices.add(service);
 
-            List< BluetoothGattCharacteristic > characteristics = service.getCharacteristics();
-            mServiceCharacteristics.put(service, characteristics );
-
-            for( BluetoothGattCharacteristic characteristic : characteristics )
+            List< ExtendedBtGattCharacteristic > extendedBtGattCharacteristics
+                    = new ArrayList<ExtendedBtGattCharacteristic>();
+            for( BluetoothGattCharacteristic characteristic : service.getCharacteristics() )
             {
-                mBluetoothLeService.readCharacteristic(characteristic);
+                extendedBtGattCharacteristics.add( new ExtendedBtGattCharacteristic( characteristic ) );
+            }
 
-                if( characteristic.getDescriptors() != null )
+            mServiceCharacteristics.put(service, extendedBtGattCharacteristics );
+
+            for( ExtendedBtGattCharacteristic characteristic : extendedBtGattCharacteristics )
+            {
+                mBluetoothLeService.readCharacteristic( characteristic.get() );
+                mCharacteristicMapping.put( characteristic.get().getUuid(), characteristic );
+
+                if( characteristic.get().getDescriptors() != null )
                 {
-                    List< BluetoothGattDescriptor > descriptors = characteristic.getDescriptors();
+                    List< BluetoothGattDescriptor > descriptors = characteristic.get().getDescriptors();
                     for( BluetoothGattDescriptor descriptor : descriptors )
                     {
                         mBluetoothLeService.readDescriptor( descriptor );
@@ -415,6 +433,7 @@ public class ConnectedDeviceActivity
         intentFilter.addAction(ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(ACTION_DATA_AVAILABLE);
+        intentFilter.addAction( ACTION_CHARACTERISTIC_READ );
         return intentFilter;
     }
 }

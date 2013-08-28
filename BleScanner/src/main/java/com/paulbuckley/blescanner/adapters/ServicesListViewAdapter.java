@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.paulbuckley.blescanner.BluetoothLeService;
+import com.paulbuckley.blescanner.ExtendedBtGattCharacteristic;
 import com.paulbuckley.blescanner.GattAttributes;
 import com.paulbuckley.blescanner.R;
 
@@ -32,7 +33,7 @@ public class ServicesListViewAdapter
 {
 
     private Activity context;
-    private Map< BluetoothGattService, List< BluetoothGattCharacteristic > > mServiceCharacteristics;
+    private Map< BluetoothGattService, List<ExtendedBtGattCharacteristic> > mServiceCharacteristics;
     private List< BluetoothGattService > mServices;
 
     private BluetoothLeService mBluetoothLeService;
@@ -42,7 +43,7 @@ public class ServicesListViewAdapter
     ServicesListViewAdapter(
             Activity context,
             List< BluetoothGattService > services,
-            Map< BluetoothGattService, List< BluetoothGattCharacteristic > > serviceCharacteristics,
+            Map< BluetoothGattService, List< ExtendedBtGattCharacteristic > > serviceCharacteristics,
             BluetoothLeService bluetoothLeService
     )
     {
@@ -82,13 +83,19 @@ public class ServicesListViewAdapter
             ViewGroup parent
     )
     {
-        BluetoothGattCharacteristic characteristic = (BluetoothGattCharacteristic) getChild(groupPosition, childPosition);
+        ExtendedBtGattCharacteristic extendedBtGattCharacteristic
+                = (ExtendedBtGattCharacteristic) getChild(groupPosition, childPosition);
+
+
+        BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
+
         LayoutInflater inflater = context.getLayoutInflater();
         
         if (convertView == null)
         {
             convertView = inflater.inflate( R.layout.characteristic_list_item, null );
         }
+        extendedBtGattCharacteristic.setListItemView( convertView );
 
         // The name of the characteristic is either held in the description "Characteristic User
         // Description" or in GattAttributes were we have a temporarily maintained mapping of
@@ -108,6 +115,17 @@ public class ServicesListViewAdapter
         {
             item.setText( GattAttributes.lookup( characteristic.getUuid().toString() ) );
         }
+
+        // Configure it so that clicking on the characteristic's name reads the value
+        item.setTag( R.string.VIEW_CHARACTERISTIC_TAG, characteristic );
+        item.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBluetoothLeService.readCharacteristic((BluetoothGattCharacteristic) v.getTag(R.string.VIEW_CHARACTERISTIC_TAG));
+            }
+        });
+
+        updateCharacteristicReadDate( extendedBtGattCharacteristic );
 
         // Populate the values in the characteristic
         populateCharacteristicValue(convertView, characteristic);
@@ -204,6 +222,20 @@ public class ServicesListViewAdapter
     }
 
 
+    public void
+    updateCharacteristicReadDate (
+            ExtendedBtGattCharacteristic characteristic
+    )
+    {
+        TextView dateValueView = (TextView) characteristic.getListItemView().findViewById( R.id.valueDateTextView );
+
+        if( dateValueView != null )
+        {
+            dateValueView.setText( characteristic.getReadTime().format( "%m-%d-%Y (%H:%M:%S)" ) );
+        }
+    }
+
+
     private void
     populateCharacteristicValue (
             View convertView,
@@ -219,7 +251,6 @@ public class ServicesListViewAdapter
             TextView asciiValueView = (TextView) convertView.findViewById( R.id.asciiValueTextView );
             TextView hexValueView = (TextView) convertView.findViewById( R.id.hexValueTextView );
             TextView intValueView = (TextView) convertView.findViewById( R.id.intValueTextView );
-            TextView dateValueView = (TextView) convertView.findViewById( R.id.valueDateTextView );
 
             final byte[] data = characteristic.getValue();
 
@@ -254,27 +285,12 @@ public class ServicesListViewAdapter
                     intValueView.setText( "" );
                 }
 
-                // Set the time of the reading.
-                Boolean read = (Boolean) convertView.getTag( R.string.CHARACTERISTIC_READ_TAG );
-                if( read != null )
-                {
-                    if( read.booleanValue() )
-                    {
-                        Time now = new Time();
-                        now.setToNow();
-                        dateValueView.setText( now.format( "%m-%d-%Y (%H:%M:%S)" ) );
-
-                        convertView.setTag( R.string.CHARACTERISTIC_READ_TAG, new Boolean( false ) );
-                    }
-                }
-
                 // Turn on the table
                 valueTable.setVisibility( View.VISIBLE );
             }
             else
             {
                 asciiValueView.setText( "..." );
-                dateValueView.setText( "Unread" );
             }
         }
         else
