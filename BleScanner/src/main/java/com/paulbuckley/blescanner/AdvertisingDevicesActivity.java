@@ -36,7 +36,7 @@ public class AdvertisingDevicesActivity
     private Handler mHandler;
     private Context mContext;
 
-    private Map< BluetoothDevice, ArrayList<UUID> > mAdvertisingDevices;
+    private ArrayList< AdvertisingBleDevice > mAdvertisers;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -54,31 +54,17 @@ public class AdvertisingDevicesActivity
 
             if( BluetoothDevice.ACTION_UUID.equals( action ) )
             {
-                BluetoothDevice device = intent.getParcelableExtra( BluetoothDevice.EXTRA_DEVICE );
-                ParcelUuid[] parcelUuids = (ParcelUuid[]) intent.getParcelableArrayExtra( BluetoothDevice.EXTRA_UUID );
 
-                if( parcelUuids != null )
-                {
-                    if( parcelUuids.length != 0 )
-                    {
-                        ArrayList< UUID > uuids = mAdvertisingDevices.get( device );
-
-                        for( ParcelUuid parcelUuid : parcelUuids )
-                        {
-                            uuids.add( parcelUuid.getUuid() );
-                        }
-
-                        mLeDeviceListAdapter.notifyDataSetChanged();
-                    }
-                }
             }
             else if ( BluetoothDevice.ACTION_FOUND.equals( action ) )
             {
+                /*
                 BluetoothDevice device = (BluetoothDevice) mLeDeviceListAdapter.getItem( 0 );
                 if( device != null )
                 {
                     device.fetchUuidsWithSdp();
                 }
+                */
             }
         }
     };
@@ -116,8 +102,6 @@ public class AdvertisingDevicesActivity
         mContext = this;
         mScanning = false;
         mHandler = new Handler();
-        mAdvertisingDevices = new HashMap< BluetoothDevice, ArrayList< UUID > >();
-
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -132,8 +116,10 @@ public class AdvertisingDevicesActivity
             startActivityForResult( enableBtIntent, REQUEST_ENABLE_BT );
         }
 
+        mAdvertisers = new ArrayList<AdvertisingBleDevice>();
+
         ListView advertisingDevicesListView = (ListView) findViewById( R.id.availableDevicesListView );
-        mLeDeviceListAdapter = new AdvertisingDevicesListAdapter( this, this.mAdvertisingDevices );
+        mLeDeviceListAdapter = new AdvertisingDevicesListAdapter( this, this.mAdvertisers );
         advertisingDevicesListView.setAdapter( mLeDeviceListAdapter );
 
         advertisingDevicesListView.setOnItemClickListener(
@@ -149,13 +135,13 @@ public class AdvertisingDevicesActivity
                     {
                         scanLeDevice( false );
 
-                        final BluetoothDevice device = (BluetoothDevice) mLeDeviceListAdapter.getItem( position );
+                        final AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getItem( position );
 
-                        if( device == null ) return;
+                        if( advertiser == null ) return;
 
                         Intent intent = new Intent( mContext, ConnectedDeviceActivity.class );
-                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, device.getName() );
-                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress() );
+                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, advertiser.device.getName() );
+                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, advertiser.device.getAddress() );
 
                         startActivity( intent );
                     }
@@ -304,10 +290,11 @@ public class AdvertisingDevicesActivity
                         byte[] scanRecord
                 )
                 {
+                    mAdvertisers.add( new AdvertisingBleDevice ( device, rssi, scanRecord ) );
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mLeDeviceListAdapter.addDevice( device );
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
                     });

@@ -5,11 +5,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.paulbuckley.blescanner.AdvertisingBleDevice;
 import com.paulbuckley.blescanner.R;
 
 import java.util.ArrayList;
@@ -20,58 +22,21 @@ import java.util.UUID;
  * Created by paulb on 8/12/13.
  */
 public class AdvertisingDevicesListAdapter
-        extends BaseAdapter
+        extends ArrayAdapter
 {
 
     private final Context context;
-    private Map< BluetoothDevice, ArrayList<UUID> > mDevices;
-    private ArrayList< BluetoothDevice > mDeviceKeys;
+    //private ArrayList< AdvertisingBleDevice > advertisers;
 
     public AdvertisingDevicesListAdapter(
             Context context,
-            Map< BluetoothDevice, ArrayList<UUID> > devices
+            ArrayList<AdvertisingBleDevice> advertisers
     )
     {
+        super( context, R.layout.available_device_row_item_layout, advertisers );
+
         this.context = context;
-        this.mDevices = devices;
-
-        // Set up an array so we can reference a position in the adapter.
-        this.mDeviceKeys = new ArrayList<BluetoothDevice>();
-        BluetoothDevice[] deviceArray = this.mDevices.keySet().toArray( new BluetoothDevice[ devices.size() ] );
-        if( deviceArray != null )
-        {
-            for( BluetoothDevice device : deviceArray )
-            {
-                mDeviceKeys.add( device );
-            }
-        }
-    }
-
-
-    @Override
-    public int
-    getCount()
-    {
-        return this.mDevices.size();
-    }
-
-
-    @Override
-    public Object
-    getItem(
-            int position
-    )
-    {
-        return mDeviceKeys.get( position );
-    }
-
-    @Override
-    public long
-    getItemId(
-            int position
-    )
-    {
-        return position;
+        //this.advertisers = advertisers;
     }
 
 
@@ -88,47 +53,30 @@ public class AdvertisingDevicesListAdapter
 
         TextView deviceNameTextView = (TextView) rowView.findViewById( R.id.deviceNameTextView );
         TextView deviceAddrTextView = (TextView) rowView.findViewById( R.id.deviceAddrTextView );
-        TableLayout deviceUuidsTable = (TableLayout) rowView.findViewById( R.id.deviceUuidsTableLayout );
+        TextView deviceRssiTV = (TextView) rowView.findViewById( R.id.deviceRssiTV );
+        TextView deviceScanRecordTV = (TextView) rowView.findViewById( R.id.deviceScanRecordTV );
 
-        BluetoothDevice device = (BluetoothDevice) this.getItem( position );
+        AdvertisingBleDevice advertiser = (AdvertisingBleDevice) this.getItem( position );
 
         // Populate all the fields.
-        deviceNameTextView.setText( device.getName() );
-        deviceAddrTextView.setText( device.getAddress() );
+        deviceNameTextView.setText( advertiser.device.getName() );
+        deviceAddrTextView.setText( advertiser.device.getAddress() );
+        deviceRssiTV.setText( Integer.toString( advertiser.rssi ) + "db" );
 
-        ArrayList< UUID > uuids = mDevices.get( device );
-        if( uuids != null )
+/*
+        // Get the value as a hex array
+        StringBuilder hexString = new StringBuilder();
+        hexString.append( "0x" );
+        for( byte hex: advertiser.scanRecord )
         {
-            for( UUID uuid : uuids )
-            {
-                LayoutInflater rowInflater  = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View v = rowInflater.inflate( R.layout.device_uuid_table_row, deviceUuidsTable, true );
-
-                TableRow row = (TableRow) v.findViewById( R.id.deviceUuidTableRow );
-                TextView text = (TextView) v.findViewById( R.id.deviceUuidTextView );
-                text.setText( uuid.toString() );
-
-                deviceUuidsTable.addView( row );
-            }
+            hexString.append( String.format( "%02X-", hex ) );
         }
+        hexString.deleteCharAt( hexString.length() - 1 );
+        deviceScanRecordTV.setText( hexString.toString() );
+  */
+
+        deviceScanRecordTV.setText( advertiser.getLocalName() );
 
         return rowView;
-    }
-
-
-    public void
-    addDevice(
-            BluetoothDevice device
-    )
-    {
-        mDeviceKeys.add( device );
-        mDevices.put(device, new ArrayList<UUID>());
-    }
-
-    public void
-    clear()
-    {
-        mDeviceKeys.clear();
-        mDevices.clear();
     }
 }
