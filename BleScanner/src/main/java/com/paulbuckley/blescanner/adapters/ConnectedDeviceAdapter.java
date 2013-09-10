@@ -1,36 +1,29 @@
 package com.paulbuckley.blescanner.adapters;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.graphics.Paint;
-import android.text.format.Time;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
-import com.paulbuckley.blescanner.BluetoothLeService;
-import com.paulbuckley.blescanner.ExtendedBtGattCharacteristic;
-import com.paulbuckley.blescanner.GattAttributes;
+import com.paulbuckley.blescanner.utilities.BluetoothLeService;
+import com.paulbuckley.blescanner.types.ExtendedBtGattCharacteristic;
+import com.paulbuckley.blescanner.ble_standards.GattUuids;
 import com.paulbuckley.blescanner.R;
 
-public class ServicesListViewAdapter
+public class ConnectedDeviceAdapter
         extends BaseExpandableListAdapter
 {
 
@@ -41,11 +34,10 @@ public class ServicesListViewAdapter
     private BluetoothLeService mBluetoothLeService;
 
 
-    public
-    ServicesListViewAdapter(
+    public ConnectedDeviceAdapter(
             Activity context,
-            List< BluetoothGattService > services,
-            Map< BluetoothGattService, List< ExtendedBtGattCharacteristic > > serviceCharacteristics,
+            List<BluetoothGattService> services,
+            Map<BluetoothGattService, List<ExtendedBtGattCharacteristic>> serviceCharacteristics,
             BluetoothLeService bluetoothLeService
     )
     {
@@ -88,14 +80,13 @@ public class ServicesListViewAdapter
         ExtendedBtGattCharacteristic extendedBtGattCharacteristic
                 = (ExtendedBtGattCharacteristic) getChild(groupPosition, childPosition);
 
-
         BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
 
         LayoutInflater inflater = context.getLayoutInflater();
         
         if (convertView == null)
         {
-            convertView = inflater.inflate( R.layout.characteristic_list_item, null );
+            convertView = inflater.inflate( R.layout.connected_device_characteristic_list_item, null );
         }
         extendedBtGattCharacteristic.setListItemView( convertView );
 
@@ -116,7 +107,6 @@ public class ServicesListViewAdapter
 
         // Populate the values in the characteristic
         populateCharacteristicValue(convertView, characteristic);
-
 
         populateCharacteristicControls(extendedBtGattCharacteristic);
 
@@ -170,17 +160,17 @@ public class ServicesListViewAdapter
 
         if ( convertView == null )
         {
-            LayoutInflater infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate( R.layout.service_list_item_layout, null );
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate( R.layout.connected_device_service_list_item, null );
         }
 
         TextView serviceNameTextView = (TextView) convertView.findViewById( R.id.serviceNameTextView );
 
         String uuid =  service.getUuid().toString();
 
-        if( GattAttributes.isKnownUuid( uuid ) )
+        if( GattUuids.isKnownUuid(uuid) )
         {
-            uuid = GattAttributes.lookup(uuid);
+            uuid = GattUuids.lookup(uuid);
         }
 
         serviceNameTextView.setText( uuid );
@@ -229,20 +219,27 @@ public class ServicesListViewAdapter
         BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
 
         // The name of the characteristic is either held in the description "Characteristic User
-        // Description" or in GattAttributes were we have a temporarily maintained mapping of
+        // Description" or in GattUuids were we have a temporarily maintained mapping of
         // UUIDs to names.
         TextView charNameTv = (TextView) convertView.findViewById( R.id.characteristicNameTextView );
         TextView charUuidTv = (TextView) convertView.findViewById( R.id.characteristicUuidTextView );
         BluetoothGattDescriptor userDescription
-                = characteristic.getDescriptor(UUID.fromString( GattAttributes.CHARACTERISTIC_USER_DESCRIPTION ) );
+                = characteristic.getDescriptor(UUID.fromString( GattUuids.CHARACTERISTIC_USER_DESCRIPTION ) );
         String characteristicName;
         if( userDescription != null )
         {
-            characteristicName = new String ( userDescription.getValue() );
+            try
+            {
+                characteristicName = new String ( userDescription.getValue() );
+            }
+            catch ( NullPointerException e )
+            {
+                characteristicName = new String( "Error!" );
+            }
         }
         else
         {
-            characteristicName = GattAttributes.lookup( characteristic.getUuid().toString() );
+            characteristicName = GattUuids.lookup(characteristic.getUuid().toString());
         }
         charNameTv.setText( characteristicName );
 

@@ -1,4 +1,4 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.activities;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
@@ -25,7 +25,11 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.paulbuckley.blescanner.adapters.ServicesListViewAdapter;
+import com.paulbuckley.blescanner.adapters.ConnectedDeviceAdapter;
+import com.paulbuckley.blescanner.utilities.BluetoothLeService;
+import com.paulbuckley.blescanner.R;
+import com.paulbuckley.blescanner.ble_standards.GattUuids;
+import com.paulbuckley.blescanner.types.ExtendedBtGattCharacteristic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.paulbuckley.blescanner.BluetoothLeService.*;
+import static com.paulbuckley.blescanner.utilities.BluetoothLeService.*;
 
 public class ConnectedDeviceActivity
         extends Activity
@@ -50,10 +54,10 @@ public class ConnectedDeviceActivity
     Context mContext;
 
     private List< BluetoothGattService > mServices;
-    private Map< BluetoothGattService, List< ExtendedBtGattCharacteristic >> mServiceCharacteristics;
+    private Map< BluetoothGattService, List<ExtendedBtGattCharacteristic>> mServiceCharacteristics;
     private Map< UUID, ExtendedBtGattCharacteristic > mCharacteristicMapping;
 
-    private ServicesListViewAdapter mServicesListViewAdapter;
+    private ConnectedDeviceAdapter mServicesListViewAdapter;
 
     private BluetoothLeService mBluetoothLeService;
 
@@ -187,7 +191,7 @@ public class ConnectedDeviceActivity
     )
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.connected_device_layout);
+        setContentView(R.layout.connected_device);
 
         this.mContext = this;
 
@@ -302,7 +306,7 @@ public class ConnectedDeviceActivity
         mCharacteristicMapping = new HashMap< UUID, ExtendedBtGattCharacteristic>();
 
         ExpandableListView servicesListView = (ExpandableListView) findViewById( R.id.deviceServicesListView );
-        mServicesListViewAdapter = new ServicesListViewAdapter(
+        mServicesListViewAdapter = new ConnectedDeviceAdapter(
                 this,
                 mServices,
                 mServiceCharacteristics,
@@ -351,7 +355,7 @@ public class ConnectedDeviceActivity
                 EditText editText = (EditText) switcher.findViewById( R.id.serviceNameEditView );
                 String currentUuid = ((BluetoothGattService)mServicesListViewAdapter.getGroup( position ) ).getUuid().toString();
 
-                editText.setText( GattAttributes.lookup( currentUuid ) );
+                editText.setText( GattUuids.lookup(currentUuid) );
                 editText.setOnEditorActionListener( saveServiceName );
 
                 switcher.showNext();

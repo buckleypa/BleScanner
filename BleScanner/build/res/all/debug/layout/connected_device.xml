@@ -19,4 +19,4 @@
         android:childIndicator="@drawable/card_border"/>
 
 </LinearLayout>
-<!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/connected_device_layout.xml -->
+<!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/connected_device.xml -->

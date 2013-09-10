@@ -1,11 +1,14 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.ble_standards;
 
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public class GattAttributes {
+public class GattUuids {
+
     private static HashMap<String, String> attributes = new HashMap();
+
+    private static String BASE_UUID                     = "00000000-0000-1000-8000-00805f9b34fb";
 
     // Service UUIDs
     public static String GENERIC_ACCESS                 = "00001800-0000-1000-8000-00805f9b34fb";
@@ -78,6 +81,15 @@ public class GattAttributes {
     {
         String name = attributes.get(uuid);
         return name == null ? UNKNOWN_UUID : name;
+    }
+
+    public static String
+    getNameFrom16bitUuid(
+        String shortUuid
+    )
+    {
+        String longUuid = BASE_UUID.substring(0,4) + shortUuid.toLowerCase() + BASE_UUID.substring(8,36);
+        return lookup( longUuid );
     }
 
     public static boolean

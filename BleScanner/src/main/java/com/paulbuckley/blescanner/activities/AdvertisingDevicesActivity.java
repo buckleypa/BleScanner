@@ -1,4 +1,4 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.activities;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -7,30 +7,31 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
-import android.os.ParcelUuid;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.paulbuckley.blescanner.adapters.AdvertisingDevicesListAdapter;
+import com.paulbuckley.blescanner.R;
+import com.paulbuckley.blescanner.adapters.AdvertisingDevicesAdapter;
+import com.paulbuckley.blescanner.types.AdvertisingBleDevice;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class AdvertisingDevicesActivity
         extends Activity
 {
-    private AdvertisingDevicesListAdapter mLeDeviceListAdapter;
+    private final static String TAG = AdvertisingDevicesActivity.class.getSimpleName();
+
+    private AdvertisingDevicesAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
@@ -95,7 +96,7 @@ public class AdvertisingDevicesActivity
     )
     {
         super.onCreate(savedInstanceState);
-        setContentView( R.layout.available_devices_layout );
+        setContentView( R.layout.advertising_devices );
 
         this.setTitle( R.string.available_devices_string );
 
@@ -118,15 +119,15 @@ public class AdvertisingDevicesActivity
 
         mAdvertisers = new ArrayList<AdvertisingBleDevice>();
 
-        ListView advertisingDevicesListView = (ListView) findViewById( R.id.availableDevicesListView );
-        mLeDeviceListAdapter = new AdvertisingDevicesListAdapter( this, this.mAdvertisers );
+        ExpandableListView advertisingDevicesListView = (ExpandableListView) findViewById( R.id.advertisingDevicesListView );
+        mLeDeviceListAdapter = new AdvertisingDevicesAdapter( this, this.mAdvertisers );
         advertisingDevicesListView.setAdapter( mLeDeviceListAdapter );
 
-        advertisingDevicesListView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener()
+        advertisingDevicesListView.setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener()
                 {
                     @Override
-                    public void onItemClick (
+                    public boolean onItemLongClick (
                             AdapterView<?>  parent,
                             final View      view,
                             int             position,
@@ -135,15 +136,26 @@ public class AdvertisingDevicesActivity
                     {
                         scanLeDevice( false );
 
-                        final AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getItem( position );
+                        int groupPosition = ExpandableListView.getPackedPositionGroup( id );
 
-                        if( advertiser == null ) return;
+                        try
+                        {
+                            final AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getGroup( groupPosition );
 
-                        Intent intent = new Intent( mContext, ConnectedDeviceActivity.class );
-                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, advertiser.device.getName() );
-                        intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, advertiser.device.getAddress() );
+                            if( advertiser == null ) return false;
 
-                        startActivity( intent );
+                            Intent intent = new Intent( mContext, ConnectedDeviceActivity.class );
+                            intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, advertiser.device.getName() );
+                            intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, advertiser.device.getAddress() );
+
+                            startActivity( intent );
+                        }
+                        catch( ArrayIndexOutOfBoundsException e )
+                        {
+                            Log.d( TAG, e.getMessage() );
+                        }
+
+                        return true;
                     }
                 }
         );

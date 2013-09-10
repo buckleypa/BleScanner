@@ -21,10 +21,10 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <service android:name=".BluetoothLeService" android:enabled="true"/>
+        <service android:name=".utilities.BluetoothLeService" android:enabled="true"/>
 
         <activity
-            android:name=".AdvertisingDevicesActivity"
+            android:name=".activities.AdvertisingDevicesActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,9 +34,9 @@
         </activity>
 
         <activity
-            android:name="com.paulbuckley.blescanner.ConnectedDeviceActivity"
+            android:name=".activities.ConnectedDeviceActivity"
             android:label="@string/title_activity_connected_device"
-            android:parentActivityName="AdvertisingDevicesActivity" >
+            android:parentActivityName=".activities.AdvertisingDevicesActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="AdvertisingDevicesActivity" />

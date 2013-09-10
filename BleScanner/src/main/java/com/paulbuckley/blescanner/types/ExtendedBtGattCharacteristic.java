@@ -1,4 +1,4 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.types;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.text.format.Time;

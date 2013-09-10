@@ -1,4 +1,4 @@
-package com.paulbuckley.blescanner;
+package com.paulbuckley.blescanner.utilities;
 
 
 import android.app.Service;
@@ -15,8 +15,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.util.Log;
+
+import com.paulbuckley.blescanner.ble_standards.GattUuids;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,7 +42,6 @@ BluetoothLeService
     private int mConnectionState = STATE_DISCONNECTED;
 
     private ArrayList< String > bleCommandsSeen = new ArrayList< String >();
-
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -292,7 +292,7 @@ BluetoothLeService
     public class LocalBinder
             extends Binder
     {
-        BluetoothLeService getService() {
+        public BluetoothLeService getService() {
             return BluetoothLeService.this;
         }
     }
@@ -803,7 +803,7 @@ BluetoothLeService
             gatt.setCharacteristicNotification( mCharacteristic, mEnabled );
 
             BluetoothGattDescriptor descriptor
-                    = mCharacteristic.getDescriptor( UUID.fromString( GattAttributes.CLIENT_CHARACTERISTIC_CONFIG ) );
+                    = mCharacteristic.getDescriptor( UUID.fromString( GattUuids.CLIENT_CHARACTERISTIC_CONFIG ) );
 
             byte[] notificationSetting = ( mEnabled ) ?
                     BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
@@ -845,7 +845,7 @@ BluetoothLeService
             gatt.setCharacteristicNotification( mCharacteristic, mEnabled );
 
             BluetoothGattDescriptor descriptor
-                    = mCharacteristic.getDescriptor( UUID.fromString( GattAttributes.CLIENT_CHARACTERISTIC_CONFIG ) );
+                    = mCharacteristic.getDescriptor( UUID.fromString( GattUuids.CLIENT_CHARACTERISTIC_CONFIG ) );
 
             byte[] notificationSetting = ( mEnabled ) ?
                     BluetoothGattDescriptor.ENABLE_INDICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;

@@ -31,38 +31,34 @@ public final class R {
         public static final int sub_card_border=0x7f020004;
     }
     public static final class id {
-        public static final int action_rescan=0x7f0a001f;
-        public static final int action_settings=0x7f0a001e;
-        public static final int asciiTableRow=0x7f0a0011;
-        public static final int asciiValueTextView=0x7f0a0012;
-        public static final int availableDevicesListView=0x7f0a0007;
-        public static final int characteristicNameTextView=0x7f0a000a;
-        public static final int characteristicUuidTextView=0x7f0a000b;
+        public static final int action_rescan=0x7f0a001b;
+        public static final int action_settings=0x7f0a001a;
+        public static final int advertisingDeviceDataInfo=0x7f0a0001;
+        public static final int advertisingDeviceDataName=0x7f0a0000;
+        public static final int advertisingDevicesListView=0x7f0a0005;
+        public static final int asciiTableRow=0x7f0a0010;
+        public static final int asciiValueTextView=0x7f0a0011;
+        public static final int characteristicNameTextView=0x7f0a0009;
+        public static final int characteristicUuidTextView=0x7f0a000a;
         public static final int deviceAddrTextView=0x7f0a0003;
         public static final int deviceNameTextView=0x7f0a0002;
         public static final int deviceRssiTV=0x7f0a0004;
-        public static final int deviceScanRecordTV=0x7f0a0005;
-        public static final int deviceServicesListView=0x7f0a0018;
-        public static final int deviceUuidTableRow=0x7f0a0019;
-        public static final int deviceUuidTextView=0x7f0a001a;
-        public static final int deviceUuidsTableLayout=0x7f0a0006;
-        public static final int doIndicateTextView=0x7f0a000f;
-        public static final int doNotifyTextView=0x7f0a000e;
-        public static final int doReadTextView=0x7f0a000c;
-        public static final int doWriteTextView=0x7f0a000d;
-        public static final int hexTableRow=0x7f0a0013;
-        public static final int hexValueTextView=0x7f0a0014;
-        public static final int instructionsTextView=0x7f0a0000;
-        public static final int intTableRow=0x7f0a0015;
-        public static final int intValueTextView=0x7f0a0016;
-        public static final int scanCompleteTextView=0x7f0a0009;
-        public static final int scanDurationProgress=0x7f0a0008;
-        public static final int serviceNameEditView=0x7f0a001d;
-        public static final int serviceNameTextView=0x7f0a001c;
-        public static final int serviceNameViewSwitcher=0x7f0a001b;
-        public static final int startScanButton=0x7f0a0001;
-        public static final int valueDateTextView=0x7f0a0017;
-        public static final int valueTableLayout=0x7f0a0010;
+        public static final int deviceServicesListView=0x7f0a0008;
+        public static final int doIndicateTextView=0x7f0a000e;
+        public static final int doNotifyTextView=0x7f0a000d;
+        public static final int doReadTextView=0x7f0a000b;
+        public static final int doWriteTextView=0x7f0a000c;
+        public static final int hexTableRow=0x7f0a0012;
+        public static final int hexValueTextView=0x7f0a0013;
+        public static final int intTableRow=0x7f0a0014;
+        public static final int intValueTextView=0x7f0a0015;
+        public static final int scanCompleteTextView=0x7f0a0007;
+        public static final int scanDurationProgress=0x7f0a0006;
+        public static final int serviceNameEditView=0x7f0a0019;
+        public static final int serviceNameTextView=0x7f0a0018;
+        public static final int serviceNameViewSwitcher=0x7f0a0017;
+        public static final int valueDateTextView=0x7f0a0016;
+        public static final int valueTableLayout=0x7f0a000f;
     }
     public static final class integer {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml 
@@ -70,13 +66,12 @@ public final class R {
         public static final int config_slide_time=0x7f060000;
     }
     public static final class layout {
-        public static final int activity_main=0x7f030000;
-        public static final int available_device_row_item_layout=0x7f030001;
-        public static final int available_devices_layout=0x7f030002;
-        public static final int characteristic_list_item=0x7f030003;
-        public static final int connected_device_layout=0x7f030004;
-        public static final int device_uuid_table_row=0x7f030005;
-        public static final int service_list_item_layout=0x7f030006;
+        public static final int advertising_device_data_list_item=0x7f030000;
+        public static final int advertising_device_list_item=0x7f030001;
+        public static final int advertising_devices=0x7f030002;
+        public static final int connected_device=0x7f030003;
+        public static final int connected_device_characteristic_list_item=0x7f030004;
+        public static final int connected_device_service_list_item=0x7f030005;
     }
     public static final class menu {
         public static final int advertising_devices=0x7f090000;
