@@ -20,6 +20,7 @@ public class
 
     public static final String READ_REQUEST = TAG + ".READ_REQUEST";
     public static final String WRITE_REQUEST = TAG + ".WRITE_REQUEST";
+    public static final String WRITE_NO_RESPONSE_REQUEST = TAG + ".WRITE_NO_RESPONSE_REQUEST";
     public static final String NOTIFY_START_REQUEST = TAG + ".NOTIFY_START_REQUEST";
     public static final String NOTIFY_STOP_REQUEST = TAG + ".NOTIFY_STOP_REQUEST";
     public static final String INDICATE_START_REQUEST = TAG + ".INDICATE_START_REQUEST";
@@ -27,6 +28,7 @@ public class
 
     public static final String CHARACTERISTIC_UUID = TAG + ".CHARACTERISTIC_UUID";
     public static final String SERVICE_UUID = TAG + ".SERVICE_UUID";
+    public static final String WRITE_DATA_TAG = TAG + ".WRITE_DATA_TAG";
 
     private BluetoothGattCharacteristic mCharacteristic;
     private Time mReadTime;
@@ -38,6 +40,9 @@ public class
     public boolean indicatable;
     public boolean noResponseWritable;
     public boolean signedWritable;
+
+    public boolean notifying = false;
+    public boolean indicating = false;
 
     public Characteristic(
             Context context,
@@ -78,12 +83,64 @@ public class
         if( this.readable != true ) return false;
 
         mReadTime.setToNow();
-
-        Intent readIntent = new Intent( READ_REQUEST );
-        readIntent.putExtra( CHARACTERISTIC_UUID, this.mCharacteristic.getUuid().toString() );
-        readIntent.putExtra( SERVICE_UUID, this.mCharacteristic.getService().getUuid().toString() );
-        mContext.sendBroadcast( readIntent );
+        mContext.sendBroadcast( makeRequestIntent( READ_REQUEST, this.mCharacteristic ) );
 
         return true;
+    }
+
+
+    public boolean
+    indicate(
+            boolean start
+    )
+    {
+        if( this.indicatable != true ) return false;
+        String action = start ? INDICATE_START_REQUEST : INDICATE_STOP_REQUEST;
+        mContext.sendBroadcast( makeRequestIntent( action, this.mCharacteristic ) );
+        indicating = start;
+        return true;
+    }
+
+
+    public boolean
+    notify(
+            boolean start
+    )
+    {
+        if( this.notifiable != true ) return false;
+        String action = start ? NOTIFY_START_REQUEST : NOTIFY_STOP_REQUEST;
+        mContext.sendBroadcast( makeRequestIntent( action, this.mCharacteristic ) );
+        notifying = start;
+        return true;
+    }
+
+
+    public boolean
+    write(
+            byte[] data
+    )
+    {
+        if( this.writable != true ) return false;
+        if( data == null || data.length == 0 ) return false;
+
+        Intent writeRequest = makeRequestIntent( WRITE_REQUEST, this.mCharacteristic);
+        writeRequest.putExtra( WRITE_DATA_TAG, data );
+        mContext.sendBroadcast( writeRequest );
+        return true;
+    }
+
+
+    private static Intent
+    makeRequestIntent(
+            String action,
+            BluetoothGattCharacteristic characteristic
+    )
+    {
+        Intent intent = new Intent( action );
+
+        intent.putExtra( CHARACTERISTIC_UUID, characteristic.getUuid().toString() );
+        intent.putExtra( SERVICE_UUID, characteristic.getService().getUuid().toString() );
+
+        return intent;
     }
 }

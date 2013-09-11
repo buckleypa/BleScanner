@@ -36,7 +36,10 @@
 
     <string name="READ_CHARACTERISTIC_ITEM_LABEL">Read</string>
     <string name="WRITE_CHARACTERISTIC_ITEM_LABEL">Write</string>
-    <string name="NOTIFY_CHARACTERISTIC_ITEM_LABEL">Notify</string>
-    <string name="INDICATE_CHARACTERISTIC_ITEM_LABEL">Indicate</string>
+    <string name="WRITE_NO_RESPONSE_CHARACTERISTIC_ITEM_LABEL">Write No Response</string>
+    <string name="NOTIFY_START_CHARACTERISTIC_ITEM_LABEL">Start Notify</string>
+    <string name="NOTIFY_STOP_CHARACTERISTIC_ITEM_LABEL">Stop Notify</string>
+    <string name="INDICATE_START_CHARACTERISTIC_ITEM_LABEL">Start Indicate</string>
+    <string name="INDICATE_STOP_CHARACTERISTIC_ITEM_LABEL">Stop Notify</string>
 
 </resources>

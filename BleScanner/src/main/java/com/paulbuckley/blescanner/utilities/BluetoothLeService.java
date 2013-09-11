@@ -44,8 +44,6 @@ BluetoothLeService
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
 
-    private ArrayList< String > bleCommandsSeen = new ArrayList< String >();
-
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
@@ -109,8 +107,6 @@ BluetoothLeService
                     intentAction = ACTION_GATT_CONNECTED;
                     mConnectionState = STATE_CONNECTED;
 
-                    bleCommandsSeen.add( "Resp: Connection" );
-
                     broadcastUpdate(intentAction);
 
                     Log.i(TAG, "Connected to GATT server.");
@@ -127,9 +123,6 @@ BluetoothLeService
                     mConnectionState = STATE_DISCONNECTED;
 
                     Log.i(TAG, "Disconnected from GATT server.");
-
-                    bleCommandsSeen.add( "Resp: Disconnection" );
-
                     broadcastUpdate(intentAction);
                 }
 
@@ -144,7 +137,6 @@ BluetoothLeService
             {
                 if ( status == BluetoothGatt.GATT_SUCCESS )
                 {
-                    bleCommandsSeen.add( "Resp: Services discovered" );
                     broadcastUpdate( ACTION_GATT_SERVICES_DISCOVERED );
                 }
                 else
@@ -164,7 +156,6 @@ BluetoothLeService
             {
                 if ( status == BluetoothGatt.GATT_SUCCESS )
                 {
-                    bleCommandsSeen.add( "Resp: Characteristic read " + characteristic.getUuid().toString() );
                     broadcastUpdate(ACTION_CHARACTERISTIC_READ, characteristic);
                 }
             }
@@ -180,7 +171,6 @@ BluetoothLeService
             {
                 if( status == BluetoothGatt.GATT_SUCCESS )
                 {
-                    bleCommandsSeen.add( "Descriptor read" );
                     broadcastUpdate( ACTION_DATA_AVAILABLE );
                 }
             }
@@ -193,7 +183,6 @@ BluetoothLeService
                     BluetoothGattCharacteristic characteristic
             )
             {
-                bleCommandsSeen.add( "Resp: Characteristic changed" );
                 broadcastUpdate( ACTION_CHARACTERISTIC_READ, characteristic );
             }
 
@@ -205,7 +194,6 @@ BluetoothLeService
                     int status
             )
             {
-                bleCommandsSeen.add( "Resp: Characteristic written" );
                 broadcastUpdate( ACTION_DATA_AVAILABLE );
             }
 
@@ -217,7 +205,6 @@ BluetoothLeService
                     int status
             )
             {
-                bleCommandsSeen.add( "Resp: Descriptor written" );
                 broadcastUpdate( ACTION_DATA_AVAILABLE );
             }
 
@@ -229,7 +216,6 @@ BluetoothLeService
                     int status
             )
             {
-                bleCommandsSeen.add( "Resp: RSSI read: " + rssi );
                 broadcastUpdate( ACTION_DATA_AVAILABLE );
             }
 
@@ -240,7 +226,6 @@ BluetoothLeService
                     int status
             )
             {
-                bleCommandsSeen.add( "Resp: Reliable write complete" );
                 broadcastUpdate( ACTION_DATA_AVAILABLE );
             }
     };
@@ -297,7 +282,39 @@ BluetoothLeService
             {
                 String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
                 String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
-                readCharacteristic( getCharacteristicFromUuidStrings(characteristicUuidStr, serviceUuidStr) );
+                readCharacteristic( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ) );
+            }
+            else if( action.equals(Characteristic.NOTIFY_START_REQUEST))
+            {
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                setCharacteristicNotification( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ), true );
+            }
+            else if( action.equals(Characteristic.NOTIFY_STOP_REQUEST))
+            {
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                setCharacteristicNotification( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ), false );
+            }
+            else if( action.equals(Characteristic.INDICATE_START_REQUEST))
+            {
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                setCharacteristicIndication( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ), true );
+            }
+            else if( action.equals(Characteristic.INDICATE_STOP_REQUEST))
+            {
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                setCharacteristicIndication( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ), false );
+            }
+            else if( action.equals(Characteristic.WRITE_REQUEST))
+            {
+                Log.d( TAG, "Write requested." );
+            }
+            else if( action.equals(Characteristic.WRITE_NO_RESPONSE_REQUEST ) )
+            {
+                Log.d( TAG, "Write no response requested." );
             }
         }
     };
@@ -332,6 +349,7 @@ BluetoothLeService
 
         filter.addAction( Characteristic.READ_REQUEST );
         filter.addAction( Characteristic.WRITE_REQUEST );
+        filter.addAction( Characteristic.WRITE_NO_RESPONSE_REQUEST );
         filter.addAction( Characteristic.INDICATE_START_REQUEST );
         filter.addAction( Characteristic.INDICATE_STOP_REQUEST );
         filter.addAction( Characteristic.NOTIFY_START_REQUEST );
@@ -394,7 +412,6 @@ BluetoothLeService
 
         return true;
     }
-
 
 
     private BluetoothGattCharacteristic
@@ -727,15 +744,8 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            boolean success = false;
-
-            if( ( mCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) != 0 )
-            {
-                success = gatt.readCharacteristic( mCharacteristic );
-                bleCommandsSeen.add( "Cmd: Characteristic Read: " + mCharacteristic.getUuid().toString() );
-            }
-
-            return success;
+            if( ( mCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) == 0) return false;
+            return gatt.readCharacteristic( mCharacteristic );
         }
     }
 
@@ -791,7 +801,6 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            bleCommandsSeen.add( "Cmd: Descriptor Read: " + mDescriptor.getUuid().toString() );
             return gatt.readDescriptor( mDescriptor );
         }
     }
@@ -825,7 +834,6 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            bleCommandsSeen.add( "Cmd: Descriptor Write: " + mDescriptor.getUuid().toString() );
             return gatt.writeDescriptor( mDescriptor );
         }
     }
@@ -857,8 +865,6 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            bleCommandsSeen.add( "Cmd: Notification Set: " + mCharacteristic.getUuid().toString() );
-
             gatt.setCharacteristicNotification( mCharacteristic, mEnabled );
 
             BluetoothGattDescriptor descriptor
@@ -899,8 +905,6 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            bleCommandsSeen.add( "Cmd: Indication Set: " + mCharacteristic.getUuid().toString() );
-
             gatt.setCharacteristicNotification( mCharacteristic, mEnabled );
 
             BluetoothGattDescriptor descriptor
@@ -931,7 +935,6 @@ BluetoothLeService
         public boolean
         run( BluetoothGatt gatt )
         {
-            bleCommandsSeen.add( "Cmd: Discover Services" );
             return gatt.discoverServices();
         }
     }
@@ -997,7 +1000,10 @@ BluetoothLeService
                 BleCommand command
         )
         {
-            mCommandQueue.add( command );
+            if( !mCommandQueue.add( command ) )
+            {
+                Log.d( TAG, "Command queue filled!" );
+            }
             this.run();
         }
     }

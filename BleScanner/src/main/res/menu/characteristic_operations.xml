@@ -12,11 +12,23 @@
         android:title="@string/WRITE_CHARACTERISTIC_ITEM_LABEL" />
 
     <item
-        android:id="@+id/notifyCharacteristicMI"
-        android:title="@string/NOTIFY_CHARACTERISTIC_ITEM_LABEL"/>
+        android:id="@+id/writeNoResponseItem"
+        android:title="@string/WRITE_NO_RESPONSE_CHARACTERISTIC_ITEM_LABEL" />
 
     <item
-        android:id="@+id/indicateCharacteristicMI"
-        android:title="@string/INDICATE_CHARACTERISTIC_ITEM_LABEL"/>
+        android:id="@+id/notifyStartItem"
+        android:title="@string/NOTIFY_START_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/notifyStopItem"
+        android:title="@string/NOTIFY_STOP_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/indicateStartItem"
+        android:title="@string/INDICATE_START_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/indicateStopItem"
+        android:title="@string/INDICATE_STOP_CHARACTERISTIC_ITEM_LABEL"/>
 
 </menu>

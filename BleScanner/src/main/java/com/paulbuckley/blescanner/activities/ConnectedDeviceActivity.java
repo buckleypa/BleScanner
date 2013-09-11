@@ -363,8 +363,11 @@ public class ConnectedDeviceActivity
 
             MenuItem readItem = menu.findItem( R.id.readCharacteristicMI );
             MenuItem writeItem = menu.findItem( R.id.writeCharacteristicMI );
-            MenuItem notifyItem = menu.findItem( R.id.notifyCharacteristicMI );
-            MenuItem indicateItem = menu.findItem( R.id.indicateCharacteristicMI );
+            MenuItem writeNotResponseItem = menu.findItem( R.id.writeNoResponseItem );
+            MenuItem notifyStartItem = menu.findItem( R.id.notifyStartItem );
+            MenuItem notifyStopItem = menu.findItem( R.id.notifyStopItem );
+            MenuItem indicateStartItem = menu.findItem( R.id.indicateStartItem );
+            MenuItem indicateStopItem = menu.findItem( R.id.indicateStopItem );
 
             Characteristic characteristic = mServicesAdapter.getSelectedCharacteristic();
 
@@ -372,8 +375,11 @@ public class ConnectedDeviceActivity
             {
                 readItem.setVisible( characteristic.readable );
                 writeItem.setVisible( characteristic.writable );
-                notifyItem.setVisible( characteristic.notifiable );
-                indicateItem.setVisible( characteristic.indicatable );
+                writeNotResponseItem.setVisible( characteristic.noResponseWritable );
+                notifyStartItem.setVisible( characteristic.notifiable && !characteristic.notifying );
+                notifyStopItem.setVisible( characteristic.notifiable && characteristic.notifying );
+                indicateStartItem.setVisible( characteristic.indicatable && !characteristic.indicating );
+                indicateStopItem.setVisible( characteristic.indicatable && characteristic.indicating );
             }
 
             return true;
@@ -386,7 +392,22 @@ public class ConnectedDeviceActivity
                 Menu menu
         )
         {
-            return false;
+            Characteristic characteristic = mServicesAdapter.getSelectedCharacteristic();
+
+            if( characteristic != null )
+            {
+                MenuItem notifyStartItem = menu.findItem( R.id.notifyStartItem );
+                MenuItem notifyStopItem = menu.findItem( R.id.notifyStopItem );
+                MenuItem indicateStartItem = menu.findItem( R.id.indicateStartItem );
+                MenuItem indicateStopItem = menu.findItem( R.id.indicateStopItem );
+
+                notifyStartItem.setVisible( characteristic.notifiable && !characteristic.notifying );
+                notifyStopItem.setVisible( characteristic.notifiable && characteristic.notifying );
+                indicateStartItem.setVisible( characteristic.indicatable && !characteristic.indicating );
+                indicateStopItem.setVisible( characteristic.indicatable && characteristic.indicating );
+            }
+
+            return true;
         }
 
         @Override
@@ -396,11 +417,7 @@ public class ConnectedDeviceActivity
             switch ( item.getItemId() )
             {
                 case R.id.readCharacteristicMI:
-                {
-                    mBluetoothLeService.readCharacteristic( characteristic.get() );
-                    //characteristic.read();
-                    Toast.makeText(ConnectedDeviceActivity.this, "Characteristic read.", Toast.LENGTH_LONG).show();
-                }
+                    characteristic.read();
                     return true;
 
                 case R.id.writeCharacteristicMI:
@@ -408,14 +425,29 @@ public class ConnectedDeviceActivity
                     //mode.finish(); // Action picked, so close the CAB
                     return true;
 
-                case R.id.notifyCharacteristicMI:
-                    mBluetoothLeService.setCharacteristicNotification( characteristic.get(), true );
-                    Toast.makeText(ConnectedDeviceActivity.this, "Notifications set.", Toast.LENGTH_LONG).show();
+                case R.id.writeNoResponseItem:
+                    Toast.makeText(ConnectedDeviceActivity.this, "Write no response coming soon.", Toast.LENGTH_LONG).show();
+                    //mode.finish(); // Action picked, so close the CAB
                     return true;
 
-                case R.id.indicateCharacteristicMI:
-                    mBluetoothLeService.setCharacteristicIndication( characteristic.get(), true );
-                    Toast.makeText(ConnectedDeviceActivity.this, "Indications set.", Toast.LENGTH_LONG).show();
+                case R.id.notifyStartItem:
+                    characteristic.notify( true );
+                    mode.invalidate();
+                    return true;
+
+                case R.id.notifyStopItem:
+                    characteristic.notify( false );
+                    mode.invalidate();
+                    return true;
+
+                case R.id.indicateStartItem:
+                    characteristic.indicate( true );
+                    mode.invalidate();
+                    return true;
+
+                case R.id.indicateStopItem:
+                    characteristic.indicate( false );
+                    mode.invalidate();
                     return true;
 
                 default:
@@ -473,7 +505,8 @@ public class ConnectedDeviceActivity
 
             for( Characteristic characteristic : extendedBtGattCharacteristics )
             {
-                mBluetoothLeService.readCharacteristic( characteristic.get() );
+                //mBluetoothLeService.readCharacteristic( characteristic.get() );
+                characteristic.read();
                 mCharacteristicMapping.put( characteristic.get().getUuid(), characteristic );
 
                 if( characteristic.get().getDescriptors() != null )

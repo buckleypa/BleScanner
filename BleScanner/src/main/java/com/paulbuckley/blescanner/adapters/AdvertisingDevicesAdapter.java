@@ -155,6 +155,8 @@ public class AdvertisingDevicesAdapter
 
         advertisingDeviceDataInfo.setText( data.toString() );
 
+        // @TODO Add info button that links to online documentation.
+
         return convertView;
     }
 
