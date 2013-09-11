@@ -19,14 +19,7 @@
         android:dividerHeight="5dp"
         android:childDivider="@android:color/transparent"
         android:childIndicator="@drawable/card_border"/>
-<!--
-    <ListView
-            android:id="@+id/availableDevicesListView"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="10dp" />
--->
+
     <ProgressBar
             android:id="@+id/scanDurationProgress"
             android:layout_height="wrap_content"

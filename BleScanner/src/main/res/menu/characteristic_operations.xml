@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/readCharacteristicMI"
+        android:title="@string/READ_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/writeCharacteristicMI"
+        android:title="@string/WRITE_CHARACTERISTIC_ITEM_LABEL" />
+
+    <item
+        android:id="@+id/notifyCharacteristicMI"
+        android:title="@string/NOTIFY_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/indicateCharacteristicMI"
+        android:title="@string/INDICATE_CHARACTERISTIC_ITEM_LABEL"/>
+
+</menu>

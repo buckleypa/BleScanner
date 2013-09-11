@@ -11,7 +11,11 @@
     <integer name="config_slide_time">800</integer>
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/strings.xml -->
     <string name="CHARACTERISTIC_READ_TAG">com.paulbuckley.blescanner.CHARACTERISTIC_READ_TAG</string>
+    <string name="INDICATE_CHARACTERISTIC_ITEM_LABEL">Indicate</string>
+    <string name="NOTIFY_CHARACTERISTIC_ITEM_LABEL">Notify</string>
+    <string name="READ_CHARACTERISTIC_ITEM_LABEL">Read</string>
     <string name="VIEW_CHARACTERISTIC_TAG">com.paulbuckley.blescanner.VIEW_CHARACTERISTIC_TAG</string>
+    <string name="WRITE_CHARACTERISTIC_ITEM_LABEL">Write</string>
     <string name="action_settings">Settings</string>
     <string name="app_name">BleScanner</string>
     <string name="asciiRowHeader">ASCII</string>

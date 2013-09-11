@@ -16,77 +16,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/characteristicNameTextView"
+            style="@android:style/TextAppearance.Large"
+            android:layout_marginRight="10dp"
+            android:textStyle="bold">
+        </TextView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/characteristicNameTextView"
-                style="@android:style/TextAppearance.Large"
-                android:textStyle="bold">
-            </TextView>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/characteristicUuidTextView"
-                style="@android:style/TextAppearance.Small">
-            </TextView>
-        </LinearLayout>
-
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="horizontal"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/doReadTextView"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Read"
-                android:padding="10dp"
-                style="@android:style/TextAppearance.Medium">
-            </TextView>
-
-            <TextView
-                android:id="@+id/doWriteTextView"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Write"
-                android:padding="10dp"
-                style="@android:style/TextAppearance.Medium">
-            </TextView>
-
-            <TextView
-                android:id="@+id/doNotifyTextView"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Notify"
-                android:padding="10dp"
-                style="@android:style/TextAppearance.Medium">
-            </TextView>
-
-            <TextView
-                android:id="@+id/doIndicateTextView"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Indicate"
-                android:padding="10dp"
-                style="@android:style/TextAppearance.Medium">
-            </TextView>
-
-        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/characteristicUuidTextView"
+            style="@android:style/TextAppearance.Small">
+        </TextView>
 
     </LinearLayout>
 
@@ -185,6 +129,7 @@
                 android:paddingRight="5dp"
                 android:singleLine="true">
             </TextView>
+
             <TextView
                 android:id="@+id/valueDateTextView"
                 android:layout_width="0dp"
@@ -194,5 +139,59 @@
 
         </TableRow>
     </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/characteristicOperations"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="15dp">
+
+        <TextView
+            android:id="@+id/doReadTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Read"
+            android:padding="10dp"
+            android:gravity="center"
+            style="@android:style/TextAppearance.Medium">
+        </TextView>
+
+        <TextView
+            android:id="@+id/doWriteTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Write"
+            android:padding="10dp"
+            android:gravity="center"
+            style="@android:style/TextAppearance.Medium">
+        </TextView>
+
+        <TextView
+            android:id="@+id/doNotifyTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Notify"
+            android:padding="10dp"
+            android:gravity="center"
+            style="@android:style/TextAppearance.Medium">
+        </TextView>
+
+        <TextView
+            android:id="@+id/doIndicateTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Indicate"
+            android:padding="10dp"
+            android:gravity="center"
+            style="@android:style/TextAppearance.Medium">
+        </TextView>
+
+    </LinearLayout>
 
 </LinearLayout><!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/layout/connected_device_characteristic_list_item.xml -->

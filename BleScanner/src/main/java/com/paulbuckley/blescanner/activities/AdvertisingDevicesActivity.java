@@ -136,11 +136,9 @@ public class AdvertisingDevicesActivity
                     {
                         scanLeDevice( false );
 
-                        int groupPosition = ExpandableListView.getPackedPositionGroup( id );
-
                         try
                         {
-                            final AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getGroup( groupPosition );
+                            AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getGroup( position );
 
                             if( advertiser == null ) return false;
 
@@ -302,11 +300,12 @@ public class AdvertisingDevicesActivity
                         byte[] scanRecord
                 )
                 {
-                    mAdvertisers.add( new AdvertisingBleDevice ( device, rssi, scanRecord ) );
+                    final AdvertisingBleDevice advertiser = new AdvertisingBleDevice ( device, rssi, scanRecord );
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            mAdvertisers.add( advertiser );
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
                     });

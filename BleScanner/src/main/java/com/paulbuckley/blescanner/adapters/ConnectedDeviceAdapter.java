@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.graphics.Paint;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ public class ConnectedDeviceAdapter
 
     private BluetoothLeService mBluetoothLeService;
 
+    private Pair< Integer, Integer> selectedChildItem = null;
 
     public ConnectedDeviceAdapter(
             Activity context,
@@ -92,23 +94,21 @@ public class ConnectedDeviceAdapter
 
         populateCharacteristicMetadata( extendedBtGattCharacteristic );
 
-/*
-        // Configure it so that clicking on the characteristic's name reads the value
-        charNameTv.setTag( R.string.VIEW_CHARACTERISTIC_TAG, characteristic );
-        charNameTv.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBluetoothLeService.readCharacteristic((BluetoothGattCharacteristic) v.getTag(R.string.VIEW_CHARACTERISTIC_TAG));
-            }
-        });
-*/
-
         updateCharacteristicReadDate( extendedBtGattCharacteristic );
 
         // Populate the values in the characteristic
         populateCharacteristicValue(convertView, characteristic);
 
         populateCharacteristicControls(extendedBtGattCharacteristic);
+
+        if( selectedChildItem != null && selectedChildItem.first == groupPosition && selectedChildItem.second == childPosition )
+        {
+            convertView.setBackgroundColor(this.context.getResources().getColor(android.R.color.holo_blue_light));
+        }
+        else
+        {
+            convertView.setBackgroundColor( this.context.getResources().getColor( R.color.characteristic_background ) );
+        }
 
         return convertView;
     }
@@ -464,4 +464,30 @@ public class ConnectedDeviceAdapter
             mBluetoothLeService.setCharacteristicIndication( characteristic, isChecked );
         }
     };
+
+
+    public void
+    setSelectedChildItem(
+            int groupPosition,
+            int childPosition
+    )
+    {
+        selectedChildItem = new Pair< Integer, Integer >( groupPosition, childPosition );
+    }
+
+
+    public void
+    resetSelectedCharacteristic()
+    {
+        selectedChildItem = null;
+    }
+
+
+    public ExtendedBtGattCharacteristic
+    getSelectedCharacteristic()
+    {
+        if( selectedChildItem == null ) return null;
+
+        return (ExtendedBtGattCharacteristic) getChild( selectedChildItem.first, selectedChildItem.second );
+    }
 }

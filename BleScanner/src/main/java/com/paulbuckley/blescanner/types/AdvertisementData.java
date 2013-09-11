@@ -2,6 +2,7 @@ package com.paulbuckley.blescanner.types;
 
 import com.paulbuckley.blescanner.ble_standards.BleAdTypes;
 import com.paulbuckley.blescanner.ble_standards.BleAdvertisingFlags;
+import com.paulbuckley.blescanner.ble_standards.BleAppearance;
 import com.paulbuckley.blescanner.ble_standards.GattUuids;
 import com.paulbuckley.blescanner.exceptions.IllegalAdvertisementDataException;
 
@@ -62,39 +63,58 @@ public class AdvertisementData {
             byte[] data
     )
     {
-        String str = null;
+        String stringRep = null;
 
         switch( type )
         {
             case BleAdTypes.COMPLETE_LOCAL_NAME:
             case BleAdTypes.SHORTENED_LOCAL_NAME:
-                str = new String( data );
+                stringRep = new String( data );
                 break;
+
 
             case BleAdTypes.TX_POWER_LEVEL:
-                str = Integer.toString( data[ 0 ] );
+                stringRep = Integer.toString( data[ 0 ] );
                 break;
+
 
             case BleAdTypes.FLAGS:
-                str = BleAdvertisingFlags.toString( data[ 0 ] );
+                stringRep = BleAdvertisingFlags.toString( data[ 0 ] );
                 break;
+
 
             case BleAdTypes.COMPLETE_16_BIT_UUID_LIST:
-
-                StringBuilder uuidsString = new StringBuilder();
-                int rawUuidsLength = data.length;
-                int i = 0;
-                while( i < rawUuidsLength )
-                {
-                    String uuid = String.format("%02X%02X", data[i + 1], data[i]);
-                    uuidsString.append( "0x" + uuid );
-                    uuidsString.append( " (" + GattUuids.getNameFrom16bitUuid( uuid ) + ")\n" );
-                    i += 2;
-                }
-                str = uuidsString.toString().trim();
+            case BleAdTypes.INCOMPLETE_16_BIT_UUID_LIST:
+                stringRep = getUuidStringRepresentation( 2, data );
                 break;
 
+
+            case BleAdTypes.COMPLETE_128_BIT_UUID_LIST:
+            case BleAdTypes.INCOMPLETE_128_BIT_UUID_LIST:
+                stringRep = getUuidStringRepresentation( 16, data );
+                break;
+
+
+            case BleAdTypes.COMPLETE_32_BIT_UUID_LIST:
+            case BleAdTypes.INCOMPLETE_32_BIT_UUID_LIST:
+                stringRep = getUuidStringRepresentation( 4, data );
+                break;
+
+
+            case BleAdTypes.APPEARANCE:
+            {
+                int appearance = 0;
+                if( data.length == 2)
+                {
+                    appearance = (( 0xFF & data[1] ) << 8 ) + ( 0xFF & data[0] );
+                }
+                stringRep = BleAppearance.toString( appearance );
+            }
+                break;
+
+
             default:
+            {
                 // Get the value as a hex array
                 StringBuilder hexString = new StringBuilder();
                 hexString.append( "0x" );
@@ -103,10 +123,41 @@ public class AdvertisementData {
                     hexString.append( String.format( "%02X-", hex ) );
                 }
                 hexString.deleteCharAt( hexString.length() - 1 );
-                str = hexString.toString();
+                stringRep = hexString.toString();
+            }
                 break;
         }
 
-        return str;
+        return stringRep;
+    }
+
+
+    private static String
+    getUuidStringRepresentation(
+            int bytesPerUuid,
+            byte[] data
+    )
+    {
+        if( bytesPerUuid % 2 != 0 ) return "Invalid UUID";
+
+        StringBuilder uuidsString = new StringBuilder();
+        int i = 0;
+        while( i < data.length )
+        {
+            StringBuilder uuidString = new StringBuilder();
+            int j = bytesPerUuid - 1;
+            while( j > 0 )
+            {
+                String uuidFragment = String.format("%02X%02X", data[i + j], data[i + j - 1]);
+                uuidString.append( uuidFragment );
+                j -= 2;
+            }
+            i += bytesPerUuid;
+
+            String uuid = uuidString.toString();
+            uuidsString.append( "0x" + uuid + " (" + GattUuids.getNameFrom16bitUuid( uuid ) + ")\n" );
+        }
+
+        return uuidsString.toString().trim();
     }
 }

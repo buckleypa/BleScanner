@@ -13,8 +13,10 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import android.view.View;
@@ -22,7 +24,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.paulbuckley.blescanner.adapters.ConnectedDeviceAdapter;
@@ -51,13 +55,15 @@ public class ConnectedDeviceActivity
     private String mDeviceName;
     private String mDeviceAddress;
 
-    Context mContext;
+    private Context mContext;
 
     private List< BluetoothGattService > mServices;
     private Map< BluetoothGattService, List<ExtendedBtGattCharacteristic>> mServiceCharacteristics;
     private Map< UUID, ExtendedBtGattCharacteristic > mCharacteristicMapping;
 
     private ConnectedDeviceAdapter mServicesListViewAdapter;
+
+    protected ActionMode mActionMode;
 
     private BluetoothLeService mBluetoothLeService;
 
@@ -170,12 +176,15 @@ public class ConnectedDeviceActivity
             else if( ACTION_CHARACTERISTIC_READ.equals( action ) )
             {
                 String uuidString = intent.getStringExtra( BluetoothLeService.EXTRA_CHARACTERISTIC_UUID );
-                UUID uuid = UUID.fromString( uuidString );
-                ExtendedBtGattCharacteristic extendedCharacteristic = mCharacteristicMapping.get( uuid );
+                if ( uuidString != null )
+                {
+                    UUID uuid = UUID.fromString( uuidString );
+                    ExtendedBtGattCharacteristic extendedCharacteristic = mCharacteristicMapping.get( uuid );
 
-                extendedCharacteristic.wasRead();
+                    extendedCharacteristic.wasRead();
 
-                mServicesListViewAdapter.notifyDataSetChanged();
+                    mServicesListViewAdapter.notifyDataSetChanged();
+                }
             }
         }
     };
@@ -314,7 +323,7 @@ public class ConnectedDeviceActivity
 
         servicesListView.setAdapter( mServicesListViewAdapter );
 
-        /*
+        // When a child is clicked, show operations that can be done on that item.
         servicesListView.setOnChildClickListener( new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean
@@ -326,19 +335,22 @@ public class ConnectedDeviceActivity
                     long id
             )
             {
-                BluetoothGattCharacteristic characteristic
-                        = mServiceCharacteristics.get( mServices.get( groupPosition ) ).get( childPosition );
-
-                if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) != 0 )
+                if( mActionMode != null )
                 {
-                    v.setTag( R.string.CHARACTERISTIC_READ_TAG, new Boolean( true ) );
-                    mBluetoothLeService.readCharacteristic( characteristic );
+                    mActionMode.finish();
                 }
+
+                mActionMode = ConnectedDeviceActivity.this.startActionMode( mActionModeCallback );
+
+                v.setSelected( true );
+
+                mServicesListViewAdapter.setSelectedChildItem( groupPosition, childPosition );
+                mServicesListViewAdapter.notifyDataSetChanged();
 
                 return true;
             }
         });
-        */
+
 
         servicesListView.setOnItemLongClickListener( new ExpandableListView.OnItemLongClickListener() {
 
@@ -364,6 +376,69 @@ public class ConnectedDeviceActivity
             }
         });
     }
+
+
+    /***********************************************************************************************
+     *
+     */
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean
+        onCreateActionMode(
+                ActionMode mode,
+                Menu menu
+        )
+        {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate( R.menu.characteristic_operations, menu );
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            ExtendedBtGattCharacteristic characteristic = mServicesListViewAdapter.getSelectedCharacteristic();
+
+            switch ( item.getItemId() )
+            {
+                case R.id.readCharacteristicMI:
+                {
+                    mBluetoothLeService.readCharacteristic( characteristic.get() );
+                    Toast.makeText(ConnectedDeviceActivity.this, "Characteristic read.", Toast.LENGTH_LONG).show();
+                }
+                    return true;
+
+                case R.id.writeCharacteristicMI:
+                    Toast.makeText(ConnectedDeviceActivity.this, "Write coming soon.", Toast.LENGTH_LONG).show();
+                    //mode.finish(); // Action picked, so close the CAB
+                    return true;
+
+                case R.id.notifyCharacteristicMI:
+                    mBluetoothLeService.setCharacteristicNotification( characteristic.get(), true );
+                    Toast.makeText(ConnectedDeviceActivity.this, "Notifications set.", Toast.LENGTH_LONG).show();
+                    return true;
+
+                case R.id.indicateCharacteristicMI:
+                    mBluetoothLeService.setCharacteristicIndication( characteristic.get(), true );
+                    Toast.makeText(ConnectedDeviceActivity.this, "Indications set.", Toast.LENGTH_LONG).show();
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mServicesListViewAdapter.resetSelectedCharacteristic();
+            mServicesListViewAdapter.notifyDataSetChanged();
+            mActionMode = null;
+        }
+    };
 
     /***********************************************************************************************
      *
