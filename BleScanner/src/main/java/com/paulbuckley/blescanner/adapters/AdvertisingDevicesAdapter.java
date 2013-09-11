@@ -1,14 +1,18 @@
 package com.paulbuckley.blescanner.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.paulbuckley.blescanner.activities.ConnectedDeviceActivity;
 import com.paulbuckley.blescanner.types.AdvertisementData;
 import com.paulbuckley.blescanner.types.AdvertisingBleDevice;
 import com.paulbuckley.blescanner.R;
@@ -117,9 +121,11 @@ public class AdvertisingDevicesAdapter
         TextView deviceAddrTextView = (TextView) convertView.findViewById( R.id.deviceAddrTextView );
         TextView deviceRssiTV = (TextView) convertView.findViewById( R.id.deviceRssiTV );
 
+        setConnectButton( groupPosition, convertView );
+
         deviceNameTextView.setText( advertiser.device.getName() );
-        deviceAddrTextView.setText( advertiser.device.getAddress() );
-        deviceRssiTV.setText( Integer.toString( advertiser.rssi ) );
+        deviceAddrTextView.setText( "Address: " + advertiser.device.getAddress() );
+        deviceRssiTV.setText( "RSSI: " + Integer.toString( advertiser.rssi ) );
 
         return convertView;
     }
@@ -167,6 +173,40 @@ public class AdvertisingDevicesAdapter
     clear()
     {
         mAdvertisers.clear();
+    }
+
+
+    private void
+    setConnectButton(
+            int groupPosition,
+            View convertView
+    )
+    {
+        LinearLayout connectButton = (LinearLayout) convertView.findViewById( R.id.connectButton );
+        connectButton.setTag( groupPosition );
+
+        connectButton.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void
+                onClick(
+                        View v
+                )
+                {
+                    Integer position = (Integer) v.getTag();
+
+                    AdvertisingBleDevice advertiser = (AdvertisingBleDevice) getGroup( position );
+
+                    if( advertiser == null ) return;
+
+                    Intent intent = new Intent( AdvertisingDevicesAdapter.this.context, ConnectedDeviceActivity.class );
+                    intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, advertiser.device.getName() );
+                    intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, advertiser.device.getAddress() );
+
+                    AdvertisingDevicesAdapter.this.context.startActivity( intent );
+                }
+            });
+        connectButton.setFocusable( false );
     }
 
 /*

@@ -123,41 +123,6 @@ public class AdvertisingDevicesActivity
         mLeDeviceListAdapter = new AdvertisingDevicesAdapter( this, this.mAdvertisers );
         advertisingDevicesListView.setAdapter( mLeDeviceListAdapter );
 
-        advertisingDevicesListView.setOnItemLongClickListener(
-                new AdapterView.OnItemLongClickListener()
-                {
-                    @Override
-                    public boolean onItemLongClick (
-                            AdapterView<?>  parent,
-                            final View      view,
-                            int             position,
-                            long            id
-                    )
-                    {
-                        scanLeDevice( false );
-
-                        try
-                        {
-                            AdvertisingBleDevice advertiser = (AdvertisingBleDevice) mLeDeviceListAdapter.getGroup( position );
-
-                            if( advertiser == null ) return false;
-
-                            Intent intent = new Intent( mContext, ConnectedDeviceActivity.class );
-                            intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_NAME, advertiser.device.getName() );
-                            intent.putExtra( ConnectedDeviceActivity.EXTRAS_DEVICE_ADDRESS, advertiser.device.getAddress() );
-
-                            startActivity( intent );
-                        }
-                        catch( ArrayIndexOutOfBoundsException e )
-                        {
-                            Log.d( TAG, e.getMessage() );
-                        }
-
-                        return true;
-                    }
-                }
-        );
-
         scanLeDevice( true );
     }
 

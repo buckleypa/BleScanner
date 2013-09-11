@@ -7,6 +7,7 @@
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/dimens.xml -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="characteristic_value_table_margin">5dp</dimen>
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml -->
     <integer name="config_slide_time">800</integer>
     <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/strings.xml -->

@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
-import android.graphics.Paint;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +18,8 @@ import android.widget.CompoundButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.paulbuckley.blescanner.types.Characteristic;
 import com.paulbuckley.blescanner.utilities.BluetoothLeService;
-import com.paulbuckley.blescanner.types.ExtendedBtGattCharacteristic;
 import com.paulbuckley.blescanner.ble_standards.GattUuids;
 import com.paulbuckley.blescanner.R;
 
@@ -29,7 +28,7 @@ public class ConnectedDeviceAdapter
 {
 
     private Activity context;
-    private Map< BluetoothGattService, List<ExtendedBtGattCharacteristic> > mServiceCharacteristics;
+    private Map< BluetoothGattService, List<Characteristic> > mServiceCharacteristics;
     private List< BluetoothGattService > mServices;
 
     private BluetoothLeService mBluetoothLeService;
@@ -39,7 +38,7 @@ public class ConnectedDeviceAdapter
     public ConnectedDeviceAdapter(
             Activity context,
             List<BluetoothGattService> services,
-            Map<BluetoothGattService, List<ExtendedBtGattCharacteristic>> serviceCharacteristics,
+            Map<BluetoothGattService, List<Characteristic>> serviceCharacteristics,
             BluetoothLeService bluetoothLeService
     )
     {
@@ -79,10 +78,8 @@ public class ConnectedDeviceAdapter
             ViewGroup parent
     )
     {
-        ExtendedBtGattCharacteristic extendedBtGattCharacteristic
-                = (ExtendedBtGattCharacteristic) getChild(groupPosition, childPosition);
-
-        BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
+        Characteristic extendedBtGattCharacteristic
+                = (Characteristic) getChild(groupPosition, childPosition);
 
         LayoutInflater inflater = context.getLayoutInflater();
         
@@ -90,16 +87,10 @@ public class ConnectedDeviceAdapter
         {
             convertView = inflater.inflate( R.layout.connected_device_characteristic_list_item, null );
         }
-        extendedBtGattCharacteristic.setListItemView( convertView );
 
-        populateCharacteristicMetadata( extendedBtGattCharacteristic );
-
-        updateCharacteristicReadDate( extendedBtGattCharacteristic );
-
-        // Populate the values in the characteristic
-        populateCharacteristicValue(convertView, characteristic);
-
-        populateCharacteristicControls(extendedBtGattCharacteristic);
+        populateCharacteristicMetadata( extendedBtGattCharacteristic, convertView );
+        updateCharacteristicReadDate( extendedBtGattCharacteristic, convertView );
+        populateCharacteristicValue( extendedBtGattCharacteristic, convertView );
 
         if( selectedChildItem != null && selectedChildItem.first == groupPosition && selectedChildItem.second == childPosition )
         {
@@ -198,10 +189,11 @@ public class ConnectedDeviceAdapter
 
     public void
     updateCharacteristicReadDate (
-            ExtendedBtGattCharacteristic characteristic
+            Characteristic characteristic,
+            View convertView
     )
     {
-        TextView dateValueView = (TextView) characteristic.getListItemView().findViewById( R.id.valueDateTextView );
+        TextView dateValueView = (TextView) convertView.findViewById(R.id.valueDateTextView);
 
         if( dateValueView != null )
         {
@@ -212,10 +204,10 @@ public class ConnectedDeviceAdapter
 
     private void
     populateCharacteristicMetadata(
-            ExtendedBtGattCharacteristic extendedBtGattCharacteristic
+            Characteristic extendedBtGattCharacteristic,
+            View convertView
     )
     {
-        View convertView = extendedBtGattCharacteristic.getListItemView();
         BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
 
         // The name of the characteristic is either held in the description "Characteristic User
@@ -223,6 +215,8 @@ public class ConnectedDeviceAdapter
         // UUIDs to names.
         TextView charNameTv = (TextView) convertView.findViewById( R.id.characteristicNameTextView );
         TextView charUuidTv = (TextView) convertView.findViewById( R.id.characteristicUuidTextView );
+        TextView characteristicPropertiesTV = (TextView) convertView.findViewById( R.id.characteristicPropertiesTV );
+
         BluetoothGattDescriptor userDescription
                 = characteristic.getDescriptor(UUID.fromString( GattUuids.CHARACTERISTIC_USER_DESCRIPTION ) );
         String characteristicName;
@@ -244,32 +238,44 @@ public class ConnectedDeviceAdapter
         charNameTv.setText( characteristicName );
 
         // Set the characteristic UUID string
-        String shortUuidString = "0x" + characteristic.getUuid().toString().substring( 4, 8 );
+        String shortUuidString = "UUID: 0x" + characteristic.getUuid().toString().substring( 4, 8 );
         charUuidTv.setText( shortUuidString );
+
+        // Get the permissions
+        StringBuilder stringBuilder = new StringBuilder();
+        if( extendedBtGattCharacteristic.readable ) stringBuilder.append( "Read/" );
+        if( extendedBtGattCharacteristic.writable ) stringBuilder.append( "Write/" );
+        if( extendedBtGattCharacteristic.notifiable ) stringBuilder.append( "Notify/" );
+        if( extendedBtGattCharacteristic.indicatable ) stringBuilder.append( "Indicate/" );
+        if( extendedBtGattCharacteristic.noResponseWritable ) stringBuilder.append( "No Response Write/" );
+        if( extendedBtGattCharacteristic.signedWritable ) stringBuilder.append( "Signed Write/" );
+        try
+        {
+            stringBuilder.deleteCharAt( stringBuilder.lastIndexOf( "/" ) );
+        }
+        catch( StringIndexOutOfBoundsException e ){}
+
+        characteristicPropertiesTV.setText( "Properties: " + stringBuilder.toString() );
     }
 
 
     private void
     populateCharacteristicValue (
-            View convertView,
-            BluetoothGattCharacteristic characteristic
+            Characteristic characteristic,
+            View convertView
     )
     {
         TableLayout valueTable = (TableLayout) convertView.findViewById( R.id.valueTableLayout );
-        int whenToShowValuesMask = 0
-                | BluetoothGattCharacteristic.PROPERTY_READ
-                | BluetoothGattCharacteristic.PROPERTY_NOTIFY
-                | BluetoothGattCharacteristic.PROPERTY_INDICATE;
 
         // Get the value, and format it in a default way, or as is described in the "Characteristic
         // Presentation Format" descriptor.
-        if( ( characteristic.getProperties() & whenToShowValuesMask ) != 0 )
+        if( characteristic.readable || characteristic.notifiable || characteristic.indicatable )
         {
             TextView asciiValueView = (TextView) convertView.findViewById( R.id.asciiValueTextView );
             TextView hexValueView = (TextView) convertView.findViewById( R.id.hexValueTextView );
             TextView intValueView = (TextView) convertView.findViewById( R.id.intValueTextView );
 
-            final byte[] data = characteristic.getValue();
+            final byte[] data = characteristic.get().getValue();
 
             // Present the data is there is data read.
             if( data != null )
@@ -314,120 +320,6 @@ public class ConnectedDeviceAdapter
         else
         {
             valueTable.setVisibility( View.GONE );
-        }
-    }
-
-    /*
-    private void
-    clientConfigurationSetup(
-            ExtendedBtGattCharacteristic extendedCharacteristic
-    )
-    {
-        ToggleButton toggleNotificationsButton
-                = (ToggleButton) extendedCharacteristic.getListItemView().findViewById( R.id.toggleNotificationsButton );
-        ToggleButton toggleIndicationsButton
-                = (ToggleButton) extendedCharacteristic.getListItemView().findViewById( R.id.toggleIndicationsButton );
-
-        // If notifications are possible for this characteristic, show the toggle
-        if( ( extendedCharacteristic.get().getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY ) != 0 )
-        {
-            toggleNotificationsButton.setVisibility( View.VISIBLE );
-
-            toggleNotificationsButton.setTag(
-                    R.string.VIEW_CHARACTERISTIC_TAG,
-                    extendedCharacteristic.get() );
-
-            toggleNotificationsButton.setOnCheckedChangeListener( onToggleNotificationsClicked );
-        }
-        else
-        {
-            toggleNotificationsButton.setVisibility( View.GONE );
-        }
-
-        // If indications are possible for this characteristic, show the toggle
-        if( (extendedCharacteristic.get().getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE ) != 0 )
-        {
-            toggleIndicationsButton.setVisibility( View.VISIBLE );
-
-            toggleIndicationsButton.setTag(
-                    R.string.VIEW_CHARACTERISTIC_TAG,
-                    extendedCharacteristic.get() );
-
-            toggleIndicationsButton.setOnCheckedChangeListener( onToggleIndicationsClicked );
-        }
-        else
-        {
-            toggleIndicationsButton.setVisibility( View.GONE );
-        }
-    }
-
-    */
-
-
-    private void
-    populateCharacteristicControls(
-            ExtendedBtGattCharacteristic extendedBtGattCharacteristic
-    )
-    {
-        BluetoothGattCharacteristic characteristic = extendedBtGattCharacteristic.get();
-
-        // Get all the text views
-        View baseView = extendedBtGattCharacteristic.getListItemView();
-        TextView readTv = (TextView) baseView.findViewById( R.id.doReadTextView );
-        TextView writeTv = (TextView) baseView.findViewById( R.id.doWriteTextView );
-        TextView notifyTv = (TextView) baseView.findViewById( R.id.doNotifyTextView );
-        TextView indicateTv = (TextView) baseView.findViewById( R.id.doIndicateTextView );
-
-        // Get colors to use.
-        int inactiveColor = this.context.getResources().getColor( R.color.inactive_option );
-        int activeColor = this.context.getResources().getColor( android.R.color.black );
-
-        // Set up handling reads
-        if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) != 0 )
-        {
-            readTv.setTextColor( activeColor );
-            readTv.setTag( R.string.VIEW_CHARACTERISTIC_TAG, characteristic );
-            readTv.setOnClickListener( new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mBluetoothLeService.readCharacteristic((BluetoothGattCharacteristic) v.getTag(R.string.VIEW_CHARACTERISTIC_TAG));
-                }
-            });
-        }
-        else
-        {
-            readTv.setTextColor( inactiveColor );
-        }
-
-        // Set up handling writes
-        if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE ) != 0 )
-        {
-            writeTv.setTextColor( activeColor );
-        }
-        else
-        {
-            writeTv.setTextColor( inactiveColor );
-        }
-
-        // Set up handling writes
-        if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY ) != 0 )
-        {
-            notifyTv.setTextColor( activeColor );
-            notifyTv.setPaintFlags( notifyTv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG );
-        }
-        else
-        {
-            notifyTv.setTextColor( inactiveColor );
-        }
-
-        // Set up handling writes
-        if( ( characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE ) != 0 )
-        {
-            indicateTv.setTextColor( activeColor );
-        }
-        else
-        {
-            indicateTv.setTextColor( inactiveColor );
         }
     }
 
@@ -483,11 +375,11 @@ public class ConnectedDeviceAdapter
     }
 
 
-    public ExtendedBtGattCharacteristic
+    public Characteristic
     getSelectedCharacteristic()
     {
         if( selectedChildItem == null ) return null;
 
-        return (ExtendedBtGattCharacteristic) getChild( selectedChildItem.first, selectedChildItem.second );
+        return (Characteristic) getChild( selectedChildItem.first, selectedChildItem.second );
     }
 }

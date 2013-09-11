@@ -22,6 +22,7 @@ public final class R {
          */
         public static final int activity_horizontal_margin=0x7f050000;
         public static final int activity_vertical_margin=0x7f050001;
+        public static final int characteristic_value_table_margin=0x7f050002;
     }
     public static final class drawable {
         public static final int card_border=0x7f020000;
@@ -33,40 +34,36 @@ public final class R {
         public static final int write_characteristic=0x7f020006;
     }
     public static final class id {
-        public static final int action_rescan=0x7f0a0021;
-        public static final int action_settings=0x7f0a001c;
+        public static final int action_rescan=0x7f0a001d;
+        public static final int action_settings=0x7f0a0018;
         public static final int advertisingDeviceDataInfo=0x7f0a0001;
         public static final int advertisingDeviceDataName=0x7f0a0000;
         public static final int advertisingDevicesListView=0x7f0a0006;
-        public static final int asciiTableRow=0x7f0a000d;
-        public static final int asciiValueTextView=0x7f0a000e;
+        public static final int asciiTableRow=0x7f0a000e;
+        public static final int asciiValueTextView=0x7f0a000f;
         public static final int characteristicNameTextView=0x7f0a000a;
-        public static final int characteristicOperations=0x7f0a0014;
+        public static final int characteristicPropertiesTV=0x7f0a000c;
         public static final int characteristicUuidTextView=0x7f0a000b;
-        public static final int deviceAddrTextView=0x7f0a0004;
-        public static final int deviceNameTextView=0x7f0a0003;
-        public static final int deviceRssiTV=0x7f0a0005;
+        public static final int connectButton=0x7f0a0005;
+        public static final int deviceAddrTextView=0x7f0a0003;
+        public static final int deviceNameTextView=0x7f0a0002;
+        public static final int deviceRssiTV=0x7f0a0004;
         public static final int deviceServicesListView=0x7f0a0009;
-        public static final int doIndicateTextView=0x7f0a0018;
-        public static final int doNotifyTextView=0x7f0a0017;
-        public static final int doReadTextView=0x7f0a0015;
-        public static final int doWriteTextView=0x7f0a0016;
-        public static final int hexTableRow=0x7f0a000f;
-        public static final int hexValueTextView=0x7f0a0010;
-        public static final int indicateCharacteristicMI=0x7f0a0020;
-        public static final int intTableRow=0x7f0a0011;
-        public static final int intValueTextView=0x7f0a0012;
-        public static final int linearLayout=0x7f0a0002;
-        public static final int notifyCharacteristicMI=0x7f0a001f;
-        public static final int readCharacteristicMI=0x7f0a001d;
+        public static final int hexTableRow=0x7f0a0010;
+        public static final int hexValueTextView=0x7f0a0011;
+        public static final int indicateCharacteristicMI=0x7f0a001c;
+        public static final int intTableRow=0x7f0a0012;
+        public static final int intValueTextView=0x7f0a0013;
+        public static final int notifyCharacteristicMI=0x7f0a001b;
+        public static final int readCharacteristicMI=0x7f0a0019;
         public static final int scanCompleteTextView=0x7f0a0008;
         public static final int scanDurationProgress=0x7f0a0007;
-        public static final int serviceNameEditView=0x7f0a001b;
-        public static final int serviceNameTextView=0x7f0a001a;
-        public static final int serviceNameViewSwitcher=0x7f0a0019;
-        public static final int valueDateTextView=0x7f0a0013;
-        public static final int valueTableLayout=0x7f0a000c;
-        public static final int writeCharacteristicMI=0x7f0a001e;
+        public static final int serviceNameEditView=0x7f0a0017;
+        public static final int serviceNameTextView=0x7f0a0016;
+        public static final int serviceNameViewSwitcher=0x7f0a0015;
+        public static final int valueDateTextView=0x7f0a0014;
+        public static final int valueTableLayout=0x7f0a000d;
+        public static final int writeCharacteristicMI=0x7f0a001a;
     }
     public static final class integer {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml 

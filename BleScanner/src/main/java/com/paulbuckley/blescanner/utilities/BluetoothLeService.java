@@ -11,13 +11,16 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.paulbuckley.blescanner.ble_standards.GattUuids;
+import com.paulbuckley.blescanner.types.Characteristic;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -48,7 +51,6 @@ BluetoothLeService
     private static final int STATE_CONNECTED = 2;
 
     private BleCommandQueuer commands;
-
 
     public final static String ACTION_GATT_CONNECTED =
             "com.paulbuckley.blescanner.ACTION_GATT_CONNECTED";
@@ -286,6 +288,21 @@ BluetoothLeService
     }
 
 
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if( action.equals(Characteristic.READ_REQUEST))
+            {
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                readCharacteristic( getCharacteristicFromUuidStrings(characteristicUuidStr, serviceUuidStr) );
+            }
+        }
+    };
+
+
     /***********************************************************************************************
      *
      */
@@ -308,6 +325,22 @@ BluetoothLeService
     }
 
 
+    private IntentFilter
+    getIntentFilter()
+    {
+        IntentFilter filter = new IntentFilter();
+
+        filter.addAction( Characteristic.READ_REQUEST );
+        filter.addAction( Characteristic.WRITE_REQUEST );
+        filter.addAction( Characteristic.INDICATE_START_REQUEST );
+        filter.addAction( Characteristic.INDICATE_STOP_REQUEST );
+        filter.addAction( Characteristic.NOTIFY_START_REQUEST );
+        filter.addAction( Characteristic.NOTIFY_STOP_REQUEST );
+
+        return filter;
+    }
+
+
 
     /***********************************************************************************************
      *
@@ -318,6 +351,8 @@ BluetoothLeService
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
         close();
+        unregisterReceiver( receiver );
+
         return super.onUnbind(intent);
     }
 
@@ -348,7 +383,6 @@ BluetoothLeService
             }
         }
 
-
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null)
         {
@@ -356,7 +390,32 @@ BluetoothLeService
             return false;
         }
 
+        registerReceiver( receiver, getIntentFilter() );
+
         return true;
+    }
+
+
+
+    private BluetoothGattCharacteristic
+    getCharacteristicFromUuidStrings(
+            String serviceUuidString,
+            String characteristicUuidString
+    )
+    {
+
+        if( characteristicUuidString == null || serviceUuidString == null ) return null;
+
+        UUID serviceUuid = UUID.fromString( serviceUuidString );
+        UUID characteristicUuid = UUID.fromString( characteristicUuidString );
+
+        if( serviceUuid == null || characteristicUuid == null ) return null;
+
+        BluetoothGattService service = mBluetoothGatt.getService( serviceUuid );
+
+        if( service == null ) return null;
+
+        return service.getCharacteristic( characteristicUuid );
     }
 
 
