@@ -176,8 +176,11 @@ public class AdvertisingDevicesActivity
      *
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
+    public boolean
+    onOptionsItemSelected(
+            MenuItem item
+    )
+    {
         switch ( item.getItemId() )
         {
             case R.id.action_rescan:

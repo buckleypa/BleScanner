@@ -1,11 +1,14 @@
 package com.paulbuckley.blescanner.activities;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -15,6 +18,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +27,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
@@ -422,6 +427,7 @@ public class ConnectedDeviceActivity
 
                 case R.id.writeCharacteristicMI:
                     Toast.makeText(ConnectedDeviceActivity.this, "Write coming soon.", Toast.LENGTH_LONG).show();
+                    showWriteDialog();
                     //mode.finish(); // Action picked, so close the CAB
                     return true;
 
@@ -522,6 +528,27 @@ public class ConnectedDeviceActivity
         }
 
         mServicesAdapter.notifyDataSetChanged();
+    }
+
+
+    private void
+    showWriteDialog()
+    {
+        LayoutInflater inflater = this.getLayoutInflater();
+        final AlertDialog.Builder builder = new AlertDialog.Builder( this );
+
+        builder.setView( inflater.inflate( R.layout.connected_device_write_dialog, null ) );
+        builder.setNegativeButton( "Cancel", null );
+        builder.setPositiveButton("Write", null );
+        /*new DialogInterface.OnClickListener() {
+            public void onClick( DialogInterface dialog, int which )
+            {
+                RadioGroup radioGroup = ((AlertDialog)dialog).
+            }
+        });*/
+        builder.setTitle( "Write Dialog" );
+
+        builder.create().show();
     }
 
 

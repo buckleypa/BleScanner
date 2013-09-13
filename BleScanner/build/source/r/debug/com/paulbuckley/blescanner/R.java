@@ -34,8 +34,8 @@ public final class R {
         public static final int write_characteristic=0x7f020006;
     }
     public static final class id {
-        public static final int action_rescan=0x7f0a0020;
-        public static final int action_settings=0x7f0a0018;
+        public static final int action_rescan=0x7f0a0024;
+        public static final int action_settings=0x7f0a001c;
         public static final int advertisingDeviceDataInfo=0x7f0a0001;
         public static final int advertisingDeviceDataName=0x7f0a0000;
         public static final int advertisingDevicesListView=0x7f0a0006;
@@ -51,13 +51,13 @@ public final class R {
         public static final int deviceServicesListView=0x7f0a0009;
         public static final int hexTableRow=0x7f0a0010;
         public static final int hexValueTextView=0x7f0a0011;
-        public static final int indicateStartItem=0x7f0a001e;
-        public static final int indicateStopItem=0x7f0a001f;
+        public static final int indicateStartItem=0x7f0a0022;
+        public static final int indicateStopItem=0x7f0a0023;
         public static final int intTableRow=0x7f0a0012;
         public static final int intValueTextView=0x7f0a0013;
-        public static final int notifyStartItem=0x7f0a001c;
-        public static final int notifyStopItem=0x7f0a001d;
-        public static final int readCharacteristicMI=0x7f0a0019;
+        public static final int notifyStartItem=0x7f0a0020;
+        public static final int notifyStopItem=0x7f0a0021;
+        public static final int readCharacteristicMI=0x7f0a001d;
         public static final int scanCompleteTextView=0x7f0a0008;
         public static final int scanDurationProgress=0x7f0a0007;
         public static final int serviceNameEditView=0x7f0a0017;
@@ -65,8 +65,12 @@ public final class R {
         public static final int serviceNameViewSwitcher=0x7f0a0015;
         public static final int valueDateTextView=0x7f0a0014;
         public static final int valueTableLayout=0x7f0a000d;
-        public static final int writeCharacteristicMI=0x7f0a001a;
-        public static final int writeNoResponseItem=0x7f0a001b;
+        public static final int writeAsHex=0x7f0a0018;
+        public static final int writeAsInteger=0x7f0a001a;
+        public static final int writeAsString=0x7f0a0019;
+        public static final int writeCharacteristicMI=0x7f0a001e;
+        public static final int writeNoResponseItem=0x7f0a001f;
+        public static final int writeValue=0x7f0a001b;
     }
     public static final class integer {
         /**  From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/values/integers.xml 
@@ -80,6 +84,7 @@ public final class R {
         public static final int connected_device=0x7f030003;
         public static final int connected_device_characteristic_list_item=0x7f030004;
         public static final int connected_device_service_list_item=0x7f030005;
+        public static final int connected_device_write_dialog=0x7f030006;
     }
     public static final class menu {
         public static final int advertising_devices=0x7f090000;
