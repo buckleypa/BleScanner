@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/readCharacteristicMI"
+        android:title="@string/READ_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/writeCharacteristicMI"
+        android:title="@string/WRITE_CHARACTERISTIC_ITEM_LABEL" />
+
+    <item
+        android:id="@+id/writeNoResponseItem"
+        android:title="@string/WRITE_NO_RESPONSE_CHARACTERISTIC_ITEM_LABEL" />
+
+    <item
+        android:id="@+id/notifyStartItem"
+        android:title="@string/NOTIFY_START_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/notifyStopItem"
+        android:title="@string/NOTIFY_STOP_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/indicateStartItem"
+        android:title="@string/INDICATE_START_CHARACTERISTIC_ITEM_LABEL"/>
+
+    <item
+        android:id="@+id/indicateStopItem"
+        android:title="@string/INDICATE_STOP_CHARACTERISTIC_ITEM_LABEL"/>
+
+</menu><!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/menu/characteristic_operations.xml -->
