@@ -426,9 +426,7 @@ public class ConnectedDeviceActivity
                     return true;
 
                 case R.id.writeCharacteristicMI:
-                    Toast.makeText(ConnectedDeviceActivity.this, "Write coming soon.", Toast.LENGTH_LONG).show();
                     showWriteDialog();
-                    //mode.finish(); // Action picked, so close the CAB
                     return true;
 
                 case R.id.writeNoResponseItem:
@@ -538,17 +536,85 @@ public class ConnectedDeviceActivity
         final AlertDialog.Builder builder = new AlertDialog.Builder( this );
 
         builder.setView( inflater.inflate( R.layout.connected_device_write_dialog, null ) );
+        builder.setTitle( "Write Characteristic Value" );
         builder.setNegativeButton( "Cancel", null );
-        builder.setPositiveButton("Write", null );
-        /*new DialogInterface.OnClickListener() {
-            public void onClick( DialogInterface dialog, int which )
-            {
-                RadioGroup radioGroup = ((AlertDialog)dialog).
-            }
-        });*/
-        builder.setTitle( "Write Dialog" );
+
+        //final EditText valueText = (EditText) findViewById( R.id.writeValue );
+
+        builder.setPositiveButton("Write",
+            new DialogInterface.OnClickListener() {
+                public void onClick( DialogInterface dialog, int which )
+                {
+                    dialog.dismiss();
+                    processWriteData( dialog );
+                }
+            } );
 
         builder.create().show();
+    }
+
+
+    private void
+    processWriteData(
+            DialogInterface dialog
+    )
+    {
+        EditText editText = (EditText) ((AlertDialog)dialog).findViewById( R.id.writeValue );
+        String writeValue = editText.getText().toString();
+        if( writeValue == null ) return;
+
+        RadioGroup valueTypeSelection = (RadioGroup) ((AlertDialog)dialog).findViewById( R.id.dataFormatSelection );
+        Characteristic characteristic = mServicesAdapter.getSelectedCharacteristic();
+        byte[] data = null;
+
+        switch( valueTypeSelection.getCheckedRadioButtonId() )
+        {
+            case R.id.writeAsHex:
+            {
+                // @TODO Have this format it correctly.
+                int length = writeValue.length();
+                if( length % 2 != 0 || length == 0 ) break;
+
+                data = new byte[ length / 2 ];
+                for( int i = 0; i < (length / 2); i++ )
+                {
+                    // Decode as an integer to account for the inability to have unsigned bytes
+                    // with Java.
+                    String temp = writeValue.substring( i * 2, (i * 2 ) + 2 );
+                    int t = Integer.decode( "0x" + temp );
+                    data[ i ] = (byte)t;
+                }
+            } break;
+
+
+            case R.id.writeAsInteger:
+            {
+                try
+                {
+                    Integer value = Integer.valueOf( writeValue );
+                    data = new byte[1];
+                    data[0] = value.byteValue();
+                }
+                catch( NumberFormatException e )
+                {
+                    Log.d( TAG, e.getMessage() );
+                }
+            } break;
+
+
+            case R.id.writeAsString:
+                data = writeValue.getBytes();
+                break;
+        }
+
+        if( !characteristic.write( data ) )
+        {
+            Toast valueNotIntegerToast = Toast.makeText(
+                    ((AlertDialog) dialog).getContext(),
+                    "Value formatted incorrectly.",
+                    Toast.LENGTH_SHORT );
+            valueNotIntegerToast.show();
+        }
     }
 
 
@@ -559,10 +625,10 @@ public class ConnectedDeviceActivity
     makeGattUpdateIntentFilter()
     {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_GATT_CONNECTED);
-        intentFilter.addAction(ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(ACTION_DATA_AVAILABLE);
+        intentFilter.addAction( ACTION_GATT_CONNECTED);
+        intentFilter.addAction( ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction( ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction( ACTION_DATA_AVAILABLE);
         intentFilter.addAction( ACTION_CHARACTERISTIC_READ );
         return intentFilter;
     }

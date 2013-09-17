@@ -310,7 +310,10 @@ BluetoothLeService
             }
             else if( action.equals(Characteristic.WRITE_REQUEST))
             {
-                Log.d( TAG, "Write requested." );
+                String characteristicUuidStr = intent.getStringExtra( Characteristic.CHARACTERISTIC_UUID );
+                String serviceUuidStr = intent.getStringExtra( Characteristic.SERVICE_UUID );
+                byte[] data = intent.getByteArrayExtra( Characteristic.WRITE_DATA_TAG );
+                writeCharaceristic( getCharacteristicFromUuidStrings( serviceUuidStr, characteristicUuidStr ), data );
             }
             else if( action.equals(Characteristic.WRITE_NO_RESPONSE_REQUEST ) )
             {
