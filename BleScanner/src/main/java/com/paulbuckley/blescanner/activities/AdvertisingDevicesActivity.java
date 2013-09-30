@@ -10,13 +10,10 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -67,6 +64,15 @@ public class AdvertisingDevicesActivity
                 }
                 */
             }
+            else if ( BluetoothAdapter.ACTION_STATE_CHANGED.equals( action ) )
+            {
+                int state = intent.getIntExtra( BluetoothAdapter.EXTRA_STATE, -1 );
+
+                if( state == BluetoothAdapter.STATE_OFF )
+                {
+                    mBluetoothAdapter.enable();
+                }
+            }
         }
     };
 
@@ -81,6 +87,7 @@ public class AdvertisingDevicesActivity
 
         intentFilter.addAction( BluetoothDevice.ACTION_UUID );
         intentFilter.addAction( BluetoothDevice.ACTION_FOUND );
+        intentFilter.addAction( BluetoothAdapter.ACTION_STATE_CHANGED );
 
         return intentFilter;
     }
@@ -186,6 +193,12 @@ public class AdvertisingDevicesActivity
             case R.id.action_rescan:
                 scanLeDevice(true);
                 return true;
+
+            case R.id.action_reset:
+                scanLeDevice( false );
+                mBluetoothAdapter.disable();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -212,6 +225,9 @@ public class AdvertisingDevicesActivity
             final boolean enable
     )
     {
+        // Don't do anything if Bluetooth is off currently.
+        if( mBluetoothAdapter.getState() == BluetoothAdapter.STATE_OFF ) return;
+
         ProgressBar progressBar = (ProgressBar) findViewById( R.id.scanDurationProgress );
         TextView textComplete = (TextView) findViewById( R.id.scanCompleteTextView );
 

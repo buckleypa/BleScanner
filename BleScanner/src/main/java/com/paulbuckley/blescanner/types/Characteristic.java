@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.text.format.Time;
 
 import com.paulbuckley.blescanner.activities.ConnectedDeviceActivity;
+import com.paulbuckley.blescanner.utilities.Peripheral;
 
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class
 
     private BluetoothGattCharacteristic mCharacteristic;
     private Time mReadTime;
-    private Context mContext;
+    private Peripheral mPeripheral;
 
     public boolean readable;
     public boolean writable;
@@ -45,11 +46,11 @@ public class
     public boolean indicating = false;
 
     public Characteristic(
-            Context context,
+            Peripheral peripheral,
             BluetoothGattCharacteristic characteristic
     )
     {
-        this.mContext = context;
+        this.mPeripheral = peripheral;
         this.mCharacteristic = characteristic;
         this.mReadTime = new Time();
         this.mReadTime.setToNow();
@@ -83,7 +84,7 @@ public class
         if( this.readable != true ) return false;
 
         mReadTime.setToNow();
-        mContext.sendBroadcast( makeRequestIntent( READ_REQUEST, this.mCharacteristic ) );
+        mPeripheral.readCharacteristic( this.mCharacteristic );
 
         return true;
     }
@@ -95,9 +96,11 @@ public class
     )
     {
         if( this.indicatable != true ) return false;
-        String action = start ? INDICATE_START_REQUEST : INDICATE_STOP_REQUEST;
-        mContext.sendBroadcast( makeRequestIntent( action, this.mCharacteristic ) );
+
+        mPeripheral.setCharacteristicIndication( this.mCharacteristic, start );
+
         indicating = start;
+
         return true;
     }
 
@@ -108,9 +111,11 @@ public class
     )
     {
         if( this.notifiable != true ) return false;
-        String action = start ? NOTIFY_START_REQUEST : NOTIFY_STOP_REQUEST;
-        mContext.sendBroadcast( makeRequestIntent( action, this.mCharacteristic ) );
+
+        mPeripheral.setCharacteristicNotification( this.mCharacteristic, start );
+
         notifying = start;
+
         return true;
     }
 
@@ -123,24 +128,8 @@ public class
         if( this.writable != true ) return false;
         if( data == null || data.length == 0 ) return false;
 
-        Intent writeRequest = makeRequestIntent( WRITE_REQUEST, this.mCharacteristic);
-        writeRequest.putExtra( WRITE_DATA_TAG, data );
-        mContext.sendBroadcast( writeRequest );
+        mPeripheral.writeCharaceristic( this.mCharacteristic, data );
+
         return true;
-    }
-
-
-    private static Intent
-    makeRequestIntent(
-            String action,
-            BluetoothGattCharacteristic characteristic
-    )
-    {
-        Intent intent = new Intent( action );
-
-        intent.putExtra( CHARACTERISTIC_UUID, characteristic.getUuid().toString() );
-        intent.putExtra( SERVICE_UUID, characteristic.getService().getUuid().toString() );
-
-        return intent;
     }
 }

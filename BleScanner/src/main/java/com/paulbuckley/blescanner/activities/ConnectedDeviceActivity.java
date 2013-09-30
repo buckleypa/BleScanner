@@ -1,20 +1,17 @@
 package com.paulbuckley.blescanner.activities;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.app.Activity;
-import android.os.IBinder;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.KeyEvent;
@@ -34,8 +31,8 @@ import android.widget.ViewSwitcher;
 
 import com.paulbuckley.blescanner.adapters.ConnectedDeviceAdapter;
 import com.paulbuckley.blescanner.types.Characteristic;
-import com.paulbuckley.blescanner.utilities.BluetoothLeService;
 import com.paulbuckley.blescanner.R;
+import com.paulbuckley.blescanner.utilities.Peripheral;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,10 +51,13 @@ public class ConnectedDeviceActivity
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
+    private final long RSSI_READ_PERIOD_MS = 4000; // ms
+
     private String mDeviceName;
     private String mDeviceAddress;
 
     private Context mContext;
+    private Handler mHandler;
 
     private List< BluetoothGattService > mServices;
     private Map< BluetoothGattService, List<Characteristic>> mServiceCharacteristics;
@@ -67,70 +67,7 @@ public class ConnectedDeviceActivity
 
     protected ActionMode mActionMode;
 
-    private BluetoothLeService mBluetoothLeService;
-
-
-    /***********************************************************************************************
-     *
-     */
-    private final TextView.OnEditorActionListener saveServiceName = new TextView.OnEditorActionListener()
-    {
-        @Override
-        public boolean
-        onEditorAction(
-                TextView v,
-                int actionId,
-                KeyEvent event
-        )
-        {
-            if( actionId == EditorInfo.IME_NULL
-                    && event.getAction() == KeyEvent.ACTION_DOWN )
-            {
-
-                ViewSwitcher switcher = (ViewSwitcher) v.findViewById(R.id.serviceNameViewSwitcher);
-                EditText nameToSaveView = (EditText) switcher.findViewById( R.id.serviceNameEditView );
-                String nameToSave = nameToSaveView.getText().toString();
-
-                TextView textView = (TextView) switcher.findViewById( R.id.serviceNameTextView );
-                textView.setText( nameToSave );
-
-                switcher.showNext();
-            }
-            return true;
-        }
-    };
-
-
-    /***********************************************************************************************
-     *
-     */
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void
-        onServiceConnected(
-                ComponentName componentName,
-                IBinder service
-        )
-        {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-
-            if ( !mBluetoothLeService.initialize() )
-            {
-                Log.e( TAG, "Unable to initialize Bluetooth" );
-                finish();
-            }
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect( mDeviceAddress );
-        }
-
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
-    };
+    private Peripheral mPeripheral;
 
 
     /***********************************************************************************************
@@ -154,30 +91,35 @@ public class ConnectedDeviceActivity
         {
             final String action = intent.getAction();
 
-            if (ACTION_GATT_CONNECTED.equals(action))
+            if ( Peripheral.ACTION_GATT_CONNECTED.equals(action))
             {
-                updateConnectionState(R.string.connected);
+                mPeripheral.discoverServices();
             }
-            else if (ACTION_GATT_DISCONNECTED.equals(action))
+
+            else if ( Peripheral.ACTION_GATT_DISCONNECTED.equals(action))
             {
-                updateConnectionState(R.string.disconnected);
+                // @TODO Do we want to return to the previous screen or explain WHY the disconnect
+                // happened?
 
                 Intent exitIntent = new Intent( mContext, AdvertisingDevicesActivity.class );
                 startActivity( exitIntent );
                 finish();
             }
-            else if (ACTION_GATT_SERVICES_DISCOVERED.equals(action))
+
+            else if ( Peripheral.ACTION_SERVICES_DISCOVERED.equals(action))
             {
                 // Show all the supported services and characteristics on the user interface.
-                displayGattServices( mBluetoothLeService.getSupportedGattServices() );
+                displayGattServices( mPeripheral.getSupportedGattServices() );
             }
-            else if (ACTION_DATA_AVAILABLE.equals(action))
+
+            else if ( Peripheral.ACTION_DESCRIPTOR_READ.equals(action))
             {
                 mServicesAdapter.notifyDataSetChanged();
             }
-            else if( ACTION_CHARACTERISTIC_READ.equals( action ) )
+
+            else if( Peripheral.ACTION_CHARACTERISTIC_READ.equals( action ) )
             {
-                String uuidString = intent.getStringExtra( BluetoothLeService.EXTRA_CHARACTERISTIC_UUID );
+                String uuidString = intent.getStringExtra( Peripheral.EXTRA_CHARACTERISTIC_UUID );
                 if ( uuidString != null )
                 {
                     UUID uuid = UUID.fromString( uuidString );
@@ -185,6 +127,14 @@ public class ConnectedDeviceActivity
 
                     mServicesAdapter.notifyDataSetChanged();
                 }
+            }
+
+            else if( Peripheral.ACTION_RSSI_UPDATED.equals( action ) )
+            {
+                int rssiValue = intent.getIntExtra( Peripheral.EXTRA_RSSI_VALUE, 0 );
+
+                TextView rssiValueTV = (TextView) findViewById( R.id.rssiValue );
+                rssiValueTV.setText( "RSSI: " + Integer.toString( rssiValue ) );
             }
         }
     };
@@ -204,6 +154,9 @@ public class ConnectedDeviceActivity
 
         this.mContext = this;
 
+        // Start reading RSSI values
+        this.mHandler = new Handler();
+
         // Show the Up button in the action bar.
         setupActionBar();
 
@@ -214,8 +167,13 @@ public class ConnectedDeviceActivity
         // Set the activity title to be the name of the device.
         this.setTitle( mDeviceName );
 
-        Intent gattServiceIntent = new Intent( this, BluetoothLeService.class );
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        registerReceiver( mGattUpdateReceiver, makeGattUpdateIntentFilter() );
+
+        // If we're creating this for the first time, connect to the Bluetooth peripheral.
+        if( savedInstanceState == null )
+        {
+            mPeripheral = new Peripheral( this, mDeviceAddress, true );
+        }
     }
 
 
@@ -227,11 +185,8 @@ public class ConnectedDeviceActivity
     onResume()
     {
         super.onResume();
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-            Log.d(TAG, "Connect request result=" + result);
-        }
+
+        mHandler.postDelayed( readRssiRunnable, RSSI_READ_PERIOD_MS );
     }
 
 
@@ -243,7 +198,8 @@ public class ConnectedDeviceActivity
     onPause()
     {
         super.onPause();
-        unregisterReceiver(mGattUpdateReceiver);
+
+        mHandler.removeCallbacks( readRssiRunnable );
     }
 
 
@@ -256,10 +212,12 @@ public class ConnectedDeviceActivity
     {
         super.onDestroy();
 
-        mBluetoothLeService.disconnect();
+        if( isFinishing() )
+        {
+            mPeripheral.disconnect();
+        }
 
-        unbindService(mServiceConnection);
-        mBluetoothLeService = null;
+        unregisterReceiver( mGattUpdateReceiver );
     }
 
 
@@ -319,7 +277,7 @@ public class ConnectedDeviceActivity
                 this,
                 mServices,
                 mServiceCharacteristics,
-                mBluetoothLeService );
+                mPeripheral );
 
         servicesListView.setAdapter(mServicesAdapter);
 
@@ -353,7 +311,7 @@ public class ConnectedDeviceActivity
 
 
     /***********************************************************************************************
-     *
+     * Handle action mode UI actions.
      */
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
         @Override
@@ -467,18 +425,6 @@ public class ConnectedDeviceActivity
         }
     };
 
-    /***********************************************************************************************
-     *
-     */
-    private void
-    updateConnectionState (
-            int stringId
-    )
-    {
-        //TextView connectionStatusTextView = (TextView) findViewById( R.id.connectionStatusTextView );
-        //connectionStatusTextView.setText( getString( stringId ) );
-    }
-
 
     /***********************************************************************************************
      *
@@ -497,12 +443,13 @@ public class ConnectedDeviceActivity
         for( BluetoothGattService service : services )
         {
             mServices.add(service);
+            Log.d( TAG, "Adding characteristic: " + service.getUuid().toString() );
 
             List<Characteristic> extendedBtGattCharacteristics
                     = new ArrayList<Characteristic>();
             for( BluetoothGattCharacteristic characteristic : service.getCharacteristics() )
             {
-                extendedBtGattCharacteristics.add( new Characteristic( this, characteristic ) );
+                extendedBtGattCharacteristics.add( new Characteristic( mPeripheral, characteristic ) );
             }
 
             mServiceCharacteristics.put(service, extendedBtGattCharacteristics );
@@ -512,13 +459,14 @@ public class ConnectedDeviceActivity
                 //mBluetoothLeService.readCharacteristic( characteristic.get() );
                 characteristic.read();
                 mCharacteristicMapping.put( characteristic.get().getUuid(), characteristic );
+                Log.d( TAG, "Adding characteristic: " + characteristic.get().getUuid().toString() );
 
                 if( characteristic.get().getDescriptors() != null )
                 {
                     List< BluetoothGattDescriptor > descriptors = characteristic.get().getDescriptors();
                     for( BluetoothGattDescriptor descriptor : descriptors )
                     {
-                        mBluetoothLeService.readDescriptor( descriptor );
+                        mPeripheral.readDescriptor( descriptor );
                     }
 
                 }
@@ -625,13 +573,35 @@ public class ConnectedDeviceActivity
     makeGattUpdateIntentFilter()
     {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction( ACTION_GATT_CONNECTED);
-        intentFilter.addAction( ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction( ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction( ACTION_DATA_AVAILABLE);
-        intentFilter.addAction( ACTION_CHARACTERISTIC_READ );
+
+        intentFilter.addAction( Peripheral.ACTION_GATT_CONNECTED);
+        intentFilter.addAction( Peripheral.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction( Peripheral.ACTION_SERVICES_DISCOVERED);
+        intentFilter.addAction( Peripheral.ACTION_CHARACTERISTIC_WRITE_COMPLETE );
+        intentFilter.addAction( Peripheral.ACTION_DESCRIPTOR_READ );
+        intentFilter.addAction( Peripheral.ACTION_CHARACTERISTIC_READ );
+        intentFilter.addAction( Peripheral.ACTION_RELIABLE_CHARACTERISTIC_WRITE_COMPLETE );
+        intentFilter.addAction( Peripheral.ACTION_RSSI_UPDATED );
+
         return intentFilter;
     }
+
+
+    /***********************************************************************************************
+     * Runnable to read RSSI periodically.
+     */
+    private Runnable readRssiRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if( mPeripheral != null )
+            {
+                mPeripheral.readRssi();
+
+                // Repost the activity to run again.
+                mHandler.postDelayed( readRssiRunnable, RSSI_READ_PERIOD_MS );
+            }
+        }
+    };
 }
 
 

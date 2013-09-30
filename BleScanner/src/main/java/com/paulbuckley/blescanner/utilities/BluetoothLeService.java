@@ -22,7 +22,6 @@ import android.util.Log;
 import com.paulbuckley.blescanner.ble_standards.GattUuids;
 import com.paulbuckley.blescanner.types.Characteristic;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -64,8 +63,10 @@ BluetoothLeService
             "com.paulbuckley.blescanner.EXTRA_CHARACTERISTIC";
     public final static String EXTRA_CHARACTERISTIC_UUID =
             "com.paulbuckley.blescanner.EXTRA_CHARACTERISTIC_UUID";
-    public final static String ACTION_CHARACTERISTIC_READ =
-            "com.paulbuckley.blescanner.ACTION_CHARACTERISTIC_READ";
+    public final static String ACTION_CHARACTERISTIC_READ = TAG + ".ACTION_CHARACTERISTIC_READ";
+    public final static String ACTION_READ_RSSI_REQUEST = TAG + ".ACTION_READ_RSSI_REQUEST";
+    public final static String ACTION_RSSI_UPDATED = TAG + ".ACTION_RSSI_UPDATED";
+    public final static String EXTRA_RSSI_VALUE = TAG + ".EXTRA_RSSI_VALUE";
 
 
 
@@ -81,7 +82,8 @@ BluetoothLeService
         WRITE_DESCRIPTOR,
         DISCOVER_SERVICES,
         SET_NOTIFICATION,
-        SET_INDICATION
+        SET_INDICATION,
+        READ_RSSI
     };
 
 
@@ -216,7 +218,14 @@ BluetoothLeService
                     int status
             )
             {
-                broadcastUpdate( ACTION_DATA_AVAILABLE );
+                if( status == BluetoothGatt.GATT_SUCCESS )
+                {
+                    final Intent intent = new Intent( ACTION_RSSI_UPDATED );
+                    intent.putExtra( EXTRA_RSSI_VALUE, rssi );
+                    sendBroadcast( intent );
+                }
+
+                commands.callComplete();
             }
 
             @Override
@@ -319,6 +328,10 @@ BluetoothLeService
             {
                 Log.d( TAG, "Write no response requested." );
             }
+            else if ( action.equals( BluetoothLeService.ACTION_READ_RSSI_REQUEST ) )
+            {
+                readRssi();
+            }
         }
     };
 
@@ -357,6 +370,7 @@ BluetoothLeService
         filter.addAction( Characteristic.INDICATE_STOP_REQUEST );
         filter.addAction( Characteristic.NOTIFY_START_REQUEST );
         filter.addAction( Characteristic.NOTIFY_STOP_REQUEST );
+        filter.addAction( BluetoothLeService.ACTION_READ_RSSI_REQUEST );
 
         return filter;
     }
@@ -538,6 +552,17 @@ BluetoothLeService
 
 
     /***********************************************************************************************
+     * Reads the RSSI of the connection.
+     */
+    private void
+    readRssi()
+    {
+        ReadRssiCommand readRssiCommand = new ReadRssiCommand();
+        commands.add( readRssiCommand );
+    }
+
+
+    /***********************************************************************************************
      *
      * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
@@ -565,6 +590,9 @@ BluetoothLeService
             }
         }
     }
+
+
+
 
 
     public void
@@ -749,6 +777,26 @@ BluetoothLeService
         {
             if( ( mCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ ) == 0) return false;
             return gatt.readCharacteristic( mCharacteristic );
+        }
+    }
+
+
+    /***********************************************************************************************
+     *
+     */
+    private class ReadRssiCommand
+            extends BleCommand
+    {
+        public ReadRssiCommand()
+        {
+            this.mType = BleOperationType.READ_RSSI;
+        }
+
+        @Override
+        public boolean
+        run( BluetoothGatt gatt )
+        {
+            return gatt.readRemoteRssi();
         }
     }
 

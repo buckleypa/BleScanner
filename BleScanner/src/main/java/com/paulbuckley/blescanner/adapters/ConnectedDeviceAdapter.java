@@ -22,6 +22,7 @@ import com.paulbuckley.blescanner.types.Characteristic;
 import com.paulbuckley.blescanner.utilities.BluetoothLeService;
 import com.paulbuckley.blescanner.ble_standards.GattUuids;
 import com.paulbuckley.blescanner.R;
+import com.paulbuckley.blescanner.utilities.Peripheral;
 
 public class ConnectedDeviceAdapter
         extends BaseExpandableListAdapter
@@ -31,7 +32,7 @@ public class ConnectedDeviceAdapter
     private Map< BluetoothGattService, List<Characteristic> > mServiceCharacteristics;
     private List< BluetoothGattService > mServices;
 
-    private BluetoothLeService mBluetoothLeService;
+    private Peripheral mPeripheral;
 
     private Pair< Integer, Integer> selectedChildItem = null;
 
@@ -39,13 +40,13 @@ public class ConnectedDeviceAdapter
             Activity context,
             List<BluetoothGattService> services,
             Map<BluetoothGattService, List<Characteristic>> serviceCharacteristics,
-            BluetoothLeService bluetoothLeService
+            Peripheral peripheral
     )
     {
         this.context = context;
         this.mServiceCharacteristics = serviceCharacteristics;
         this.mServices = services;
-        this.mBluetoothLeService = bluetoothLeService;
+        this.mPeripheral = peripheral;
     }
 
 
@@ -336,7 +337,7 @@ public class ConnectedDeviceAdapter
             BluetoothGattCharacteristic characteristic
                     = (BluetoothGattCharacteristic) buttonView.getTag( R.string.VIEW_CHARACTERISTIC_TAG );
 
-            mBluetoothLeService.setCharacteristicNotification( characteristic, isChecked );
+            mPeripheral.setCharacteristicNotification( characteristic, isChecked );
         }
     };
 
@@ -353,7 +354,7 @@ public class ConnectedDeviceAdapter
             BluetoothGattCharacteristic characteristic
                     = (BluetoothGattCharacteristic) buttonView.getTag( R.string.VIEW_CHARACTERISTIC_TAG );
 
-            mBluetoothLeService.setCharacteristicIndication( characteristic, isChecked );
+            mPeripheral.setCharacteristicIndication( characteristic, isChecked );
         }
     };
 

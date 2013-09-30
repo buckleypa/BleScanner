@@ -3,10 +3,16 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
     <item
         android:id="@+id/action_rescan"
         android:title="Rescan"
         android:showAsAction="ifRoom"
         android:icon="@drawable/navigation_refresh" />
+
+    <item
+        android:id="@+id/action_reset"
+        android:title="Reset"
+        android:showAsAction="ifRoom" />
 </menu>
 <!-- From: file:/C:/Users/paulb/AndroidStudioProjects/BleScannerProject/BleScanner/src/main/res/menu/main.xml -->
